@@ -21,7 +21,9 @@ const DigitalTwinPage = () => {
             try {
                 const parsed = JSON.parse(savedUserStr)
                 setUserData(parsed)
-                runSimulation(parsed.id, 0)
+                if (parsed?.id) {
+                    runSimulation(parsed.id, 0)
+                }
             } catch (err) {
                 console.error('Failed to parse user data:', err)
             }
@@ -220,7 +222,7 @@ const DigitalTwinPage = () => {
                             <div className="subject-header">
                                 <div className="subject-id">
                                     <span className="label">Subject 001</span>
-                                    <span className="id-val">{userData?.id?.substring(0, 8) || 'DM_00000'}</span>
+                                    <span className="id-val">{userData?.id ? String(userData.id).substring(0, 8) : 'DM_00000'}</span>
                                 </div>
                                 <div className="status-dot online"></div>
                             </div>
