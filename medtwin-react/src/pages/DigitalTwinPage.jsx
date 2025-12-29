@@ -145,9 +145,12 @@ const DigitalTwinPage = () => {
                         // Gentle rotation
                         bodyGroup.rotation.y += 0.002
 
-                        // Pulse effect on heart
-                        const pulse = Math.sin(Date.now() * 0.003) * 0.05 + 1
-                        heart.scale.set(pulse, pulse, pulse)
+                        // Pulse effect on heart (only if loaded)
+                        const heartModel = scene.userData.heartModel
+                        if (heartModel) {
+                            const pulse = Math.sin(Date.now() * 0.003) * 0.05 + 0.4 // Pulse around the scale scale 0.4
+                            heartModel.scale.set(pulse, pulse, pulse)
+                        }
 
                         controls.update()
                         renderer.render(scene, camera)
