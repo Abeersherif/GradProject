@@ -6,73 +6,135 @@ const DigitalTwinPage = () => {
     const [simulationData, setSimulationData] = useState(null)
     const [loading, setLoading] = useState(false)
     const [selectedOrgan, setSelectedOrgan] = useState('all')
+    const [timelineYear, setTimelineYear] = useState(2025)
     const canvasRef = useRef(null)
+    const sceneRef = useRef(null)
 
     useEffect(() => {
-        // Load user data
         const savedUserStr = localStorage.getItem('patientUser') || localStorage.getItem('user')
         if (savedUserStr) {
             try {
-                setUserData(JSON.parse(savedUserStr))
+                const parsed = JSON.parse(savedUserStr)
+                setUserData(parsed)
+                // Trigger initial simulation for current year
+                runSimulation(parsed.id, 0)
             } catch (err) {
                 console.error('Failed to parse user data:', err)
             }
         }
     }, [])
 
-    // Initialize 3D scene with Three.js
+    const runSimulation = async (patientId, yearsAhead = 0) => {
+        setLoading(true)
+        try {
+            const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin.onrender.com';
+            const BASE = VITE_API_URL.endsWith('/api') ? VITE_API_URL : `${VITE_API_URL}/api`;
+
+            // Call the correct visualization-data endpoint
+            const response = await fetch(`${BASE}/twin/${patientId}/visualization-data?years_ahead=${yearsAhead}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+
+            if (!response.ok) throw new Error('Simulation failed')
+
+            const data = await response.json()
+            setSimulationData(data)
+
+            // Update 3D model colors based on organ status
+            updateModelColors(data.organs)
+        } catch (error) {
+            console.error('Simulation error:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const updateModelColors = (organs) => {
+        if (!sceneRef.current || !organs) return
+
+        sceneRef.current.traverse((child) => {
+            if (child.isMesh && child.name) {
+                const name = child.name.toLowerCase()
+                let color = null
+
+                if (name.includes('heart')) color = organs.heart?.color
+                if (name.includes('pancreas')) color = organs.pancreas?.color
+                if (name.includes('kidney')) color = organs.kidneys?.color
+                if (name.includes('vessel') || name.includes('blood')) color = organs.vessels?.color
+
+                if (color) {
+                    const mappedColor = color === 'red' ? 0xff4d4d : color === 'yellow' ? 0xffcc00 : 0x00ff88
+                    child.material.color.setHex(mappedColor)
+                    child.material.emissive = new (sceneRef.current.constructor).Color(mappedColor)
+                    child.material.emissiveIntensity = 0.2
+                }
+            }
+        })
+    }
+
+    const handleYearChange = (e) => {
+        const year = parseInt(e.target.value)
+        setTimelineYear(year)
+        if (userData?.id) {
+            runSimulation(userData.id, year - 2025)
+        }
+    }
+
+    // Initialize 3D scene
     useEffect(() => {
         if (!canvasRef.current) return
 
-        // Import Three.js dynamically
         import('three').then(THREE => {
             import('three/examples/jsm/loaders/GLTFLoader').then(({ GLTFLoader }) => {
                 import('three/examples/jsm/controls/OrbitControls').then(({ OrbitControls }) => {
                     const canvas = canvasRef.current
                     const scene = new THREE.Scene()
-                    scene.background = new THREE.Color(0x0a0a0a)
+                    sceneRef.current = scene
+                    scene.background = new THREE.Color(0x0a0a0d)
 
-                    // Camera
-                    const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
-                    camera.position.set(0, 1.5, 4)
+                    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
+                    camera.position.set(0, 1.2, 3.5)
 
-                    // Renderer
-                    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+                    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
                     renderer.setSize(canvas.clientWidth, canvas.clientHeight)
                     renderer.setPixelRatio(window.devicePixelRatio)
 
-                    // Lighting
-                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-                    scene.add(ambientLight)
+                    // Better lighting for medical aesthetic
+                    scene.add(new THREE.AmbientLight(0xffffff, 0.4))
 
-                    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-                    directionalLight.position.set(5, 5, 5)
-                    scene.add(directionalLight)
+                    const frontLight = new THREE.PointLight(0xffffff, 0.8)
+                    frontLight.position.set(0, 2, 4)
+                    scene.add(frontLight)
 
-                    const backLight = new THREE.DirectionalLight(0x6b46c1, 0.3)
-                    backLight.position.set(-5, 3, -5)
-                    scene.add(backLight)
+                    const rimLight = new THREE.DirectionalLight(0x4080ff, 0.5)
+                    rimLight.position.set(-2, 2, -2)
+                    scene.add(rimLight)
 
-                    // Controls
                     const controls = new OrbitControls(camera, canvas)
                     controls.enableDamping = true
                     controls.dampingFactor = 0.05
-                    controls.minDistance = 2
-                    controls.maxDistance = 10
+                    controls.minDistance = 1.5
+                    controls.maxDistance = 6
+                    controls.target.set(0, 1, 0)
 
-                    // Create body representation
                     const bodyGroup = new THREE.Group()
                     const loader = new GLTFLoader()
 
-                    // 1. Load Body/Skin (The Shell)
-                    loader.load('/models/skin.glb', (gltf) => {
+                    // Handle gender models
+                    const isFemale = userData?.gender?.toLowerCase() === 'female' || userData?.sex?.toLowerCase() === 'female'
+                    const suffix = isFemale ? '_female' : ''
+
+                    // 1. Load Body
+                    loader.load(`/models/skin${suffix}.glb`, (gltf) => {
                         const model = gltf.scene
-                        model.position.set(0, 0, 0)
-                        model.scale.set(1, 1, 1)
                         model.traverse((child) => {
                             if (child.isMesh) {
                                 child.material = new THREE.MeshPhongMaterial({
-                                    color: 0xcccccc,
+                                    color: 0x1a2a4a,
                                     transparent: true,
                                     opacity: 0.15,
                                     side: THREE.DoubleSide
@@ -80,77 +142,49 @@ const DigitalTwinPage = () => {
                             }
                         })
                         bodyGroup.add(model)
-                    }, undefined, (e) => {
-                        // Fallback if model not found: create simple cylinder
-                        const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.4, 3, 32)
-                        const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xf5f1e8, transparent: true, opacity: 0.1 })
-                        bodyGroup.add(new THREE.Mesh(bodyGeometry, bodyMaterial))
-                    })
-
-                    // 2. Load Heart
-                    loader.load('/models/heart.glb', (gltf) => {
-                        const heart = gltf.scene
-                        heart.position.set(0, 0, 0)
-                        heart.scale.set(1, 1, 1)
-                        heart.name = 'heart'
-                        bodyGroup.add(heart)
-
-                        // Add pulsing animation specifically to the heart scene
-                        scene.userData.heartModel = heart
-                    })
-
-                    // 3. Load Pancreas
-                    loader.load('/models/pancreas.glb', (gltf) => {
-                        const pancreas = gltf.scene
-                        pancreas.position.set(0, 0, 0)
-                        pancreas.scale.set(1, 1, 1)
-                        pancreas.name = 'pancreas'
-                        bodyGroup.add(pancreas)
-                    })
-
-                    // 4. Load Kidneys
-                    loader.load('/models/kidney_left.glb', (gltf) => {
-                        const left = gltf.scene
-                        left.position.set(0, 0, 0)
-                        left.scale.set(1, 1, 1)
-                        bodyGroup.add(left)
-                    })
-                    loader.load('/models/kidney_right.glb', (gltf) => {
-                        const right = gltf.scene
-                        right.position.set(0, 0, 0)
-                        right.scale.set(1, 1, 1)
-                        bodyGroup.add(right)
-                    })
-
-                    // 5. Load Vascular System
-                    loader.load('/models/blood_vasculature.glb', (gltf) => {
-                        const vessels = gltf.scene
-                        vessels.position.set(0, 0, 0)
-                        vessels.scale.set(1, 1, 1)
-                        bodyGroup.add(vessels)
                     }, undefined, () => {
-                        // Simple vessels fallback
-                        const vascularMaterial = new THREE.LineBasicMaterial({ color: 0xa8b5a0, linewidth: 2 })
-                        const points = [new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0)]
-                        const geometry = new THREE.BufferGeometry().setFromPoints(points)
-                        bodyGroup.add(new THREE.Line(geometry, vascularMaterial))
+                        const geo = new THREE.CylinderGeometry(0.5, 0.4, 2.5, 32)
+                        bodyGroup.add(new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color: 0x112233, transparent: true, opacity: 0.2 })))
+                    })
+
+                    // 2. Load Internal Organs
+                    const organs = [
+                        { name: 'heart', file: `heart${suffix}.glb` },
+                        { name: 'pancreas', file: `pancreas${suffix}.glb` },
+                        { name: 'kidney_left', file: `kidney_left${suffix}.glb` },
+                        { name: 'kidney_right', file: `kidney_right${suffix}.glb` },
+                        { name: 'eye_left', file: `eye_left${suffix}.glb` },
+                        { name: 'eye_right', file: `eye_right${suffix}.glb` },
+                        { name: 'vasculature', file: `blood_vasculature.glb` }
+                    ]
+
+                    organs.forEach(org => {
+                        loader.load(`/models/${org.file}`, (gltf) => {
+                            const model = gltf.scene
+                            model.name = org.name
+                            model.traverse(child => {
+                                if (child.isMesh) {
+                                    child.material = new THREE.MeshPhongMaterial({
+                                        color: 0x444444,
+                                        shininess: 50
+                                    })
+                                }
+                            })
+                            bodyGroup.add(model)
+                            if (org.name === 'heart') scene.userData.heartModel = model
+                        })
                     })
 
                     scene.add(bodyGroup)
 
-                    // Animation loop
                     let animationId
                     const animate = () => {
                         animationId = requestAnimationFrame(animate)
+                        bodyGroup.rotation.y += 0.001
 
-                        // Gentle rotation
-                        bodyGroup.rotation.y += 0.002
-
-                        // Pulse effect on heart (only if loaded)
-                        const heartModel = scene.userData.heartModel
-                        if (heartModel) {
-                            const pulse = Math.sin(Date.now() * 0.003) * 0.03 + 1.0
-                            heartModel.scale.set(pulse, pulse, pulse)
+                        if (scene.userData.heartModel) {
+                            const scale = 1.0 + Math.sin(Date.now() * 0.002) * 0.01 // Very subtle pulse
+                            scene.userData.heartModel.scale.set(scale, scale, scale)
                         }
 
                         controls.update()
@@ -158,294 +192,174 @@ const DigitalTwinPage = () => {
                     }
                     animate()
 
-                    // Handle resize
                     const handleResize = () => {
-                        if (!canvas) return
                         camera.aspect = canvas.clientWidth / canvas.clientHeight
                         camera.updateProjectionMatrix()
                         renderer.setSize(canvas.clientWidth, canvas.clientHeight)
                     }
                     window.addEventListener('resize', handleResize)
 
-                    // Cleanup
                     return () => {
                         window.removeEventListener('resize', handleResize)
-                        if (animationId) cancelAnimationFrame(animationId)
+                        cancelAnimationFrame(animationId)
                         renderer.dispose()
                     }
                 })
             })
-        }).catch(err => {
-            console.error('Failed to load Three.js:', err)
         })
-    }, [])
-
-    const runSimulation = async () => {
-        if (!userData || !userData.diseases) {
-            alert('Please complete your health profile first!')
-            return
-        }
-
-        setLoading(true)
-        try {
-            const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin.onrender.com';
-            const BASE = VITE_API_URL.endsWith('/api') ? VITE_API_URL : `${VITE_API_URL}/api`;
-            const response = await fetch(`${BASE}/twin/simulate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({
-                    patient_id: userData.id,
-                    conditions: userData.diseases,
-                    age: userData.age,
-                    glucose: userData.glucose || 100,
-                    blood_pressure: userData.blood_pressure || '120/80'
-                })
-            })
-
-            if (!response.ok) throw new Error('Simulation failed')
-
-            const data = await response.json()
-            setSimulationData(data)
-        } catch (error) {
-            console.error('Simulation error:', error)
-            alert('Failed to run simulation. Please try again.')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const organData = {
-        heart: {
-            name: 'Heart',
-            color: '#e8b4b8',
-            icon: '❤️',
-            metrics: ['Heart Rate', 'Blood Pressure', 'Cardiac Output']
-        },
-        kidney: {
-            name: 'Kidneys',
-            color: '#6b46c1',
-            icon: '🫘',
-            metrics: ['Filtration Rate', 'Creatinine', 'Electrolytes']
-        },
-        pancreas: {
-            name: 'Pancreas',
-            color: '#d4af37',
-            icon: '🥞',
-            metrics: ['Insulin Production', 'Glucose Regulation', 'Enzyme Secretion']
-        },
-        vessels: {
-            name: 'Vascular System',
-            color: '#a8b5a0',
-            icon: '🔴',
-            metrics: ['Blood Flow', 'Oxygen Saturation', 'Vessel Health']
-        }
-    }
-
-    const userInitials = (() => {
-        if (!userData) return 'MT'
-        if (userData.firstName && userData.lastName) {
-            return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase()
-        }
-        return 'MT'
-    })()
+    }, [userData])
 
     const fullName = userData?.firstName && userData?.lastName
         ? `${userData.firstName} ${userData.lastName}`
         : (userData?.fullName || userData?.full_name || 'Guest User')
 
     return (
-        <div className="dashboard-container">
-            {/* Sidebar */}
-            <aside className="dashboard-sidebar">
-                <div className="sidebar-logo">
-                    <span className="logo-icon">✨</span>
-                    <span>MedTwin</span>
+        <div className="twin-page-v2">
+            {/* Sidebar (Main App) remains, but we wrap our layout inside dashboard-main */}
+            <div className="visual-interface">
+
+                {/* Top Title Overlay */}
+                <div className="title-overlay">
+                    <h2>PREDICTIVE ORGAN ANALYSIS</h2>
+                    <div className="glow-bar"></div>
                 </div>
 
-                <nav className="sidebar-nav">
-                    <a href="/patient/dashboard" className="nav-item">
-                        <span className="nav-icon">📊</span>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="/patient/consultation" className="nav-item">
-                        <span className="nav-icon">👨‍⚕️</span>
-                        <span>Consultations</span>
-                    </a>
-                    <a href="/patient/medications" className="nav-item">
-                        <span className="nav-icon">💊</span>
-                        <span>Medications</span>
-                    </a>
-                    <a href="/patient/lab-results" className="nav-item">
-                        <span className="nav-icon">🧪</span>
-                        <span>Reports</span>
-                    </a>
-                    <a href="/patient/digital-twin" className="nav-item active">
-                        <span className="nav-icon">🧬</span>
-                        <span>3D Visualization</span>
-                    </a>
-                    <a href="/patient/profile" className="nav-item">
-                        <span className="nav-icon">👤</span>
-                        <span>Profile</span>
-                    </a>
-                </nav>
+                <div className="interface-grid">
+                    {/* LEFT PANEL: BIOMETRICS & AI */}
+                    <aside className="left-panel">
+                        <section className="subject-card glass-card">
+                            <div className="subject-header">
+                                <div className="subject-id">
+                                    <span className="label">Subject 001</span>
+                                    <span className="id-val">{userData?.id?.substring(0, 8) || 'DM_00000'}</span>
+                                </div>
+                                <div className="status-dot online"></div>
+                            </div>
+                            <button className="load-btn">LOAD</button>
+                        </section>
 
-                <div className="sidebar-footer">
-                    <div className="user-profile-mini">
-                        <div className="user-avatar">{userInitials}</div>
-                        <div className="user-info-mini">
-                            <h4>{fullName}</h4>
-                            <p>ID: {userData?.id || 'MT-0000'}</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
+                        <section className="biometrics-grid">
+                            <div className="bio-card glass-card">
+                                <span className="bio-label">AGE</span>
+                                <span className="bio-value">{userData?.age || 58}</span>
+                            </div>
+                            <div className="bio-card glass-card">
+                                <span className="bio-label">SEX</span>
+                                <span className="bio-value">{userData?.gender || userData?.sex || 'Female'}</span>
+                            </div>
+                            <div className="bio-card glass-card warning">
+                                <span className="bio-label">HBA1C</span>
+                                <span className="bio-value">{userData?.hba1c || '10.9'}%</span>
+                                <div className="indicator-line orange"></div>
+                            </div>
+                            <div className="bio-card glass-card">
+                                <span className="bio-label">BMI</span>
+                                <span className="bio-value">{userData?.bmi || '35.8'}</span>
+                            </div>
+                        </section>
 
-            {/* Main Content */}
-            <main className="dashboard-main">
-                <header className="dashboard-header">
-                    <div className="welcome-section">
-                        <h1>Digital Twin Visualization</h1>
-                        <p>Interactive 3D model of your body systems with real-time health simulation</p>
-                    </div>
-                    <div className="header-actions">
-                        <button
-                            className="btn btn-primary"
-                            onClick={runSimulation}
-                            disabled={loading}
-                        >
-                            <span>🔬</span>
-                            {loading ? 'Running...' : 'Run Simulation'}
-                        </button>
-                    </div>
-                </header>
+                        <section className="risk-legend glass-card">
+                            <h4>RISK LEGEND</h4>
+                            <div className="legend-item">
+                                <span className="dot low"></span>
+                                <span>Low Risk - Healthy</span>
+                            </div>
+                            <div className="legend-item">
+                                <span className="dot moderate"></span>
+                                <span>Moderate Risk</span>
+                            </div>
+                            <div className="legend-item">
+                                <span className="dot high"></span>
+                                <span>High Risk - Critical</span>
+                            </div>
+                        </section>
 
-                <div className="twin-container">
-                    {/* 3D Visualization */}
-                    <section className="twin-3d-view">
-                        <canvas ref={canvasRef} className="twin-canvas" />
-                        <div className="twin-controls">
-                            <button className="control-btn" title="Reset View">
-                                <span>🔄</span>
-                            </button>
-                            <button className="control-btn" title="Zoom In">
-                                <span>➕</span>
-                            </button>
-                            <button className="control-btn" title="Zoom Out">
-                                <span>➖</span>
-                            </button>
-                        </div>
+                        <section className="ai-report-card glass-card">
+                            <h4>COGNITIVE BRAIN ANALYSIS</h4>
+                            <div className="ai-btn-wrapper">
+                                <div className="ai-btn-content">
+                                    <span className="brain-icon">🧠</span>
+                                    <div className="ai-text">
+                                        <p className="main">View AI Analysis</p>
+                                        <p className="sub">Cognitive System {simulationData ? 'Online' : 'Offline'}...</p>
+                                    </div>
+                                    <span className="arrow">→</span>
+                                </div>
+                            </div>
+                        </section>
+                    </aside>
+
+                    {/* CENTER PANEL: 3D VIEW */}
+                    <section className="center-view">
+                        <canvas ref={canvasRef} className="twin-canvas-v2" />
                     </section>
 
-                    {/* Organ Selector */}
-                    <aside className="twin-sidebar">
-                        <h3 className="sidebar-title">Organ Systems</h3>
-                        <div className="organ-list">
-                            <button
-                                className={`organ-btn ${selectedOrgan === 'all' ? 'active' : ''}`}
-                                onClick={() => setSelectedOrgan('all')}
-                            >
-                                <span className="organ-icon">🫁</span>
-                                <span>All Systems</span>
-                            </button>
-                            {Object.entries(organData).map(([key, organ]) => (
-                                <button
-                                    key={key}
-                                    className={`organ-btn ${selectedOrgan === key ? 'active' : ''}`}
-                                    onClick={() => setSelectedOrgan(key)}
-                                    style={{ '--organ-color': organ.color }}
-                                >
-                                    <span className="organ-icon">{organ.icon}</span>
-                                    <span>{organ.name}</span>
-                                </button>
-                            ))}
-                        </div>
+                    {/* RIGHT PANEL: ORGAN STATUS */}
+                    <aside className="right-panel">
+                        <div className="organs-list-card glass-card">
+                            <h3>Organ Systems</h3>
+                            <p className="sub-hint">Click organ to focus</p>
 
-                        {selectedOrgan !== 'all' && organData[selectedOrgan] && (
-                            <div className="organ-details">
-                                <h4 style={{ color: organData[selectedOrgan].color }}>
-                                    {organData[selectedOrgan].name} Metrics
-                                </h4>
-                                <ul className="metrics-list">
-                                    {organData[selectedOrgan].metrics.map((metric, idx) => (
-                                        <li key={idx}>{metric}</li>
-                                    ))}
-                                </ul>
+                            <div className="organ-status-rows">
+                                <div className="status-row">
+                                    <span className="org-name">PANCREAS</span>
+                                    <span className={`status-tag ${simulationData?.organs?.pancreas?.risk_level || 'moderate'}`}>
+                                        {simulationData?.organs?.pancreas?.risk_level || 'moderate'}
+                                    </span>
+                                </div>
+                                <div className="status-row">
+                                    <span className="org-name">VESSELS</span>
+                                    <span className={`status-tag ${simulationData?.organs?.vessels?.risk_level || 'low'}`}>
+                                        {simulationData?.organs?.vessels?.risk_level || 'low'}
+                                    </span>
+                                </div>
+                                <div className="status-row">
+                                    <span className="org-name">KIDNEYS</span>
+                                    <span className={`status-tag ${simulationData?.organs?.kidneys?.risk_level || 'high'}`}>
+                                        {simulationData?.organs?.kidneys?.risk_level || 'high'}
+                                    </span>
+                                </div>
+                                <div className="status-row">
+                                    <span className="org-name">EYES</span>
+                                    <span className={`status-tag ${simulationData?.organs?.eyes?.risk_level || 'high'}`}>
+                                        {simulationData?.organs?.eyes?.risk_level || 'high'}
+                                    </span>
+                                </div>
+                                <div className="status-row">
+                                    <span className="org-name">HEART</span>
+                                    <span className={`status-tag ${simulationData?.organs?.heart?.risk_level || 'high'}`}>
+                                        {simulationData?.organs?.heart?.risk_level || 'high'}
+                                    </span>
+                                </div>
                             </div>
-                        )}
+
+                            <div className="view-controls-hint">
+                                <p><span>🖱️</span> ROTATE: Drag</p>
+                                <p><span>🔍</span> ZOOM: Scroll</p>
+                                <p><span>🎯</span> FOCUS: Click organ</p>
+                            </div>
+                        </div>
                     </aside>
                 </div>
 
-                {/* Simulation Results */}
-                {simulationData && (
-                    <section className="simulation-results">
-                        <h2 className="section-title">Simulation Results</h2>
-                        <div className="results-grid">
-                            <div className="result-card">
-                                <div className="result-header">
-                                    <span className="result-icon">📊</span>
-                                    <h3>Overall Health Score</h3>
-                                </div>
-                                <div className="result-value">
-                                    {simulationData.health_score || 'N/A'}/100
-                                </div>
-                                <div className="result-status">
-                                    {simulationData.overall_status || 'Calculating...'}
-                                </div>
-                            </div>
-
-                            <div className="result-card">
-                                <div className="result-header">
-                                    <span className="result-icon">⚠️</span>
-                                    <h3>Risk Factors</h3>
-                                </div>
-                                <ul className="risk-list">
-                                    {simulationData.risk_factors?.map((risk, idx) => (
-                                        <li key={idx}>{risk}</li>
-                                    )) || <li>No significant risks detected</li>}
-                                </ul>
-                            </div>
-
-                            <div className="result-card">
-                                <div className="result-header">
-                                    <span className="result-icon">💡</span>
-                                    <h3>Recommendations</h3>
-                                </div>
-                                <ul className="recommendation-list">
-                                    {simulationData.recommendations?.map((rec, idx) => (
-                                        <li key={idx}>{rec}</li>
-                                    )) || <li>Continue current treatment plan</li>}
-                                </ul>
-                            </div>
-                        </div>
-                    </section>
-                )}
-
-                {/* Info Panel */}
-                <section className="info-panel">
-                    <h3>About Digital Twin</h3>
-                    <p>
-                        Your digital twin is a personalized 3D model that simulates how your body systems interact based on your health data.
-                        The simulation uses advanced AI algorithms to predict potential health outcomes and provide personalized recommendations.
-                    </p>
-                    <div className="info-features">
-                        <div className="feature-item">
-                            <span>🔬</span>
-                            <span>Real-time simulation</span>
-                        </div>
-                        <div className="feature-item">
-                            <span>📈</span>
-                            <span>Predictive analytics</span>
-                        </div>
-                        <div className="feature-item">
-                            <span>🎯</span>
-                            <span>Personalized insights</span>
-                        </div>
+                {/* BOTTOM PANEL: TIMELINE SLIDER */}
+                <footer className="timeline-footer">
+                    <div className="slider-container glass-card">
+                        <span className="slider-label">FUTURE PREDICTION</span>
+                        <input
+                            type="range"
+                            min="2025"
+                            max="2035"
+                            step="1"
+                            value={timelineYear}
+                            onChange={handleYearChange}
+                            className="year-slider"
+                        />
+                        <span className="year-display">{timelineYear}</span>
                     </div>
-                </section>
-            </main>
+                </footer>
+
+            </div>
         </div>
     )
 }
