@@ -6,10 +6,14 @@ import os
 
 app = Flask(__name__)
 
+# Get frontend URL from environment variable for production
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+
 # CORS configuration - Allow frontend to access backend
 CORS(app, resources={
     r"/api/*": {
         "origins": [
+            FRONTEND_URL,
             "https://medtwinweb.onrender.com",
             "http://localhost:5173",
             "http://localhost:3000"

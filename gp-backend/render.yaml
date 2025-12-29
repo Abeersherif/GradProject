@@ -1,0 +1,10 @@
+# Render.com Blueprint for MedTwin Backend
+# This file helps Render automatically detect and configure your service
+
+# Build configuration
+build:
+  - pip install -r requirements.txt
+
+# Start command
+start:
+  - gunicorn app:app --bind 0.0.0.0:$PORT

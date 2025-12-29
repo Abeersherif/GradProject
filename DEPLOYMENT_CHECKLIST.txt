@@ -1,0 +1,177 @@
+===============================================================================
+MEDTWIN DEPLOYMENT CHECKLIST
+===============================================================================
+
+Use this checklist to track your deployment progress.
+
+===============================================================================
+PRE-DEPLOYMENT
+===============================================================================
+
+□ Backend requirements.txt is complete
+□ Frontend package.json is correct
+□ .gitignore is properly configured
+□ All sensitive files are excluded from Git
+□ DeepSeek API key is ready
+□ Google Cloud credentials ready (if using Calendar)
+
+===============================================================================
+GITHUB
+===============================================================================
+
+□ Created GitHub repository
+□ Initialized Git in local project
+□ Added all files to Git
+□ Committed changes
+□ Added remote origin
+□ Pushed to GitHub main branch
+□ Verified files are on GitHub
+
+===============================================================================
+BACKEND DEPLOYMENT (RENDER)
+===============================================================================
+
+□ Created Render account
+□ Connected GitHub
+□ Created new Web Service
+□ Configured service name: medtwin-backend
+□ Set root directory: gp-backend
+□ Set build command: pip install -r requirements.txt
+□ Set start command: gunicorn app:app --bind 0.0.0.0:$PORT
+□ Added DEEPSEEK_API_KEY environment variable
+□ Added FLASK_ENV=production
+□ Added PYTHON_VERSION=3.11.0
+□ Clicked "Create Web Service"
+□ Waited for deployment to complete
+□ Copied backend URL: _________________________________
+□ Tested /health endpoint - returns {"status": "healthy"}
+
+===============================================================================
+FRONTEND DEPLOYMENT (VERCEL)
+===============================================================================
+
+□ Created Vercel account
+□ Connected GitHub
+□ Imported repository
+□ Set project name: medtwin-react
+□ Set framework: Vite
+□ Set root directory: medtwin-react
+□ Set build command: npm run build
+□ Set output directory: dist
+□ Added VITE_API_URL environment variable with backend URL
+□ Clicked "Deploy"
+□ Waited for deployment to complete
+□ Copied frontend URL: _________________________________
+□ Tested frontend loads in browser
+
+===============================================================================
+CONNECT FRONTEND <-> BACKEND
+===============================================================================
+
+□ Went to Render backend service
+□ Added/Updated FRONTEND_URL environment variable
+□ Set value to Vercel frontend URL
+□ Saved and waited for automatic redeploy
+□ Tested frontend can communicate with backend
+
+===============================================================================
+FUNCTIONALITY TESTING
+===============================================================================
+
+□ Homepage loads without errors
+□ Login page works
+□ Registration works
+□ Can log in successfully
+□ Dashboard displays
+□ Patient data loads
+□ Digital Twin page loads
+□ 3D models render:
+  □ Body model
+  □ Heart model
+  □ Kidneys model
+  □ Pancreas model
+  □ Vasculature model
+□ Timeline slider works
+□ No console errors in browser DevTools
+
+===============================================================================
+AGENT TESTING
+===============================================================================
+
+□ Can upload medical report
+□ Medical analysis agent responds
+□ Prediction agent generates forecasts
+□ Medication agent provides recommendations
+□ Notifier agent works
+□ Coordinator agent works
+□ All agent responses display correctly
+
+===============================================================================
+GOOGLE CALENDAR (OPTIONAL)
+===============================================================================
+
+□ Updated OAuth redirect URIs in Google Cloud Console
+□ Added backend URL to authorized redirects
+□ Uploaded credentials.json to Render as Secret File
+□ Tested Google Calendar authorization
+□ Can create calendar events
+□ Medications sync to calendar
+
+===============================================================================
+OPTIMIZATION
+===============================================================================
+
+□ Verified CORS is properly configured
+□ All environment variables are set
+□ SSL/HTTPS is enabled on both frontend and backend
+□ No security warnings in browser
+□ API responses are fast
+□ 3D models load quickly
+□ No memory leaks
+
+===============================================================================
+MONITORING & MAINTENANCE
+===============================================================================
+
+□ Set up email notifications in Render
+□ Set up uptime monitoring
+□ Documented all environment variables
+□ Saved backup of configuration
+□ Tested from different devices/networks
+□ Shared URLs with team
+
+===============================================================================
+POST-DEPLOYMENT (OPTIONAL)
+===============================================================================
+
+□ Set up custom domain
+□ Configured DNS
+□ Updated environment variables with custom domain
+□ Added analytics (Google Analytics, etc.)
+□ Set up error tracking (Sentry, etc.)
+□ Created user documentation
+□ Planned backup strategy
+□ Set up staging environment
+
+===============================================================================
+FINAL VERIFICATION
+===============================================================================
+
+DEPLOYED URLS:
+Backend:  _________________________________________________
+Frontend: _________________________________________________
+
+DEPLOYMENT DATE: _________________________________________
+
+STATUS: □ Development  □ Staging  □ Production
+
+NOTES:
+________________________________________________________________________
+________________________________________________________________________
+________________________________________________________________________
+
+===============================================================================
+
+🎉 Deployment Complete! Your MedTwin app is live!
+
+===============================================================================
