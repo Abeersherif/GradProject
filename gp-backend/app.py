@@ -18,6 +18,8 @@ load_dotenv()
 # Initialize Flask app
 app = Flask(__name__)
 
+# Allow CORS for all origins in development and production to ensure connectivity
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')

@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 // Base API URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+// Base API URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://medtwin.onrender.com/api'
 
 // Create axios instance with default config
 const api = axios.create({
