@@ -128,10 +128,11 @@ const DigitalTwinPage = () => {
         controls.enableDamping = true
         controls.dampingFactor = 0.05
         controls.minDistance = 1.5
-        controls.maxDistance = 6
+        controls.maxDistance = 10
         controls.target.set(0, 1, 0)
 
         const bodyGroup = bodyGroupRef.current
+        bodyGroup.scale.set(50, 50, 50) // Scale UP by 50x to make models visible!
         scene.add(bodyGroup)
 
         const loader = new GLTFLoader()
@@ -144,9 +145,9 @@ const DigitalTwinPage = () => {
             model.traverse((child) => {
                 if (child.isMesh) {
                     child.material = new THREE.MeshPhongMaterial({
-                        color: 0x1a2a4a,
+                        color: 0x2a3a5a,
                         transparent: true,
-                        opacity: 0.15,
+                        opacity: 0.2,
                         side: THREE.DoubleSide
                     })
                 }
