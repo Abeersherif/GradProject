@@ -186,7 +186,7 @@ const DigitalTwinPage = () => {
         try {
             const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin.onrender.com';
             const BASE = VITE_API_URL.endsWith('/api') ? VITE_API_URL : `${VITE_API_URL}/api`;
-            const response = await fetch(`${BASE}/digital-twin/simulate`, {
+            const response = await fetch(`${BASE}/twin/simulate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
