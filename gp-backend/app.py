@@ -80,6 +80,7 @@ from routes.medication import medication_bp
 from routes.doctor import doctor_bp
 from routes.patient_export import patient_export_bp
 from routes.agents import agents_bp
+from routes.digital_twin import digital_twin_bp
 
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
@@ -89,6 +90,7 @@ app.register_blueprint(medication_bp, url_prefix='/api/medications')
 app.register_blueprint(doctor_bp, url_prefix='/api/doctor')
 app.register_blueprint(patient_export_bp, url_prefix='/api/patient')
 app.register_blueprint(agents_bp, url_prefix='/api/agents')
+app.register_blueprint(digital_twin_bp, url_prefix='/api/digital-twin')
 
 
 # Create database tables

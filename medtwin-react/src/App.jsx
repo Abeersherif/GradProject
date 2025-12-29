@@ -11,6 +11,7 @@ import ConsultationPage from './pages/ConsultationPage'
 import MedicationsPage from './pages/MedicationsPage'
 import LabResultsPage from './pages/LabResultsPage'
 import ProfilePage from './pages/ProfilePage'
+import DigitalTwinPage from './pages/DigitalTwinPage'
 
 // Components
 import AnimatedBackground from './components/AnimatedBackground'
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/consultation" element={<ConsultationPage />} />
                     <Route path="/patient/consultation" element={<ConsultationPage />} />
                     <Route path="/patient/medications" element={<MedicationsPage />} />
+                    <Route path="/patient/digital-twin" element={<DigitalTwinPage />} />
                     <Route path="/patient/lab-results" element={<LabResultsPage />} />
                     <Route path="/patient/profile" element={<ProfilePage />} />
 

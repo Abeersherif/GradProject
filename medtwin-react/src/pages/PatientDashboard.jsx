@@ -136,6 +136,10 @@ const PatientDashboard = () => {
                         <span className="nav-icon">💊</span>
                         <span>Medications</span>
                     </Link>
+                    <Link to="/patient/digital-twin" className="nav-item">
+                        <span className="nav-icon">🧬</span>
+                        <span>3D Visualization</span>
+                    </Link>
                     <Link to="/patient/lab-results" className="nav-item">
                         <span className="nav-icon">🧪</span>
                         <span>Reports</span>
