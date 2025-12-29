@@ -62,78 +62,78 @@ const DigitalTwinPage = () => {
 
                     // Create body representation
                     const bodyGroup = new THREE.Group()
+                    const loader = new GLTFLoader()
 
-                    // Body (transparent shell)
-                    const bodyGeometry = new THREE.CylinderGeometry(0.4, 0.35, 2, 32)
-                    const bodyMaterial = new THREE.MeshPhongMaterial({
-                        color: 0xf5f1e8,
-                        transparent: true,
-                        opacity: 0.15,
-                        side: THREE.DoubleSide,
-                        wireframe: false
-                    })
-                    const body = new THREE.Mesh(bodyGeometry, bodyMaterial)
-                    bodyGroup.add(body)
-
-                    // Heart
-                    const heartGeometry = new THREE.SphereGeometry(0.12, 32, 32)
-                    const heartMaterial = new THREE.MeshPhongMaterial({
-                        color: 0xe8b4b8,
-                        emissive: 0xe8b4b8,
-                        emissiveIntensity: 0.3,
-                        shininess: 30
-                    })
-                    const heart = new THREE.Mesh(heartGeometry, heartMaterial)
-                    heart.position.set(-0.1, 0.3, 0)
-                    heart.name = 'heart'
-                    bodyGroup.add(heart)
-
-                    // Kidneys
-                    const kidneyGeometry = new THREE.SphereGeometry(0.08, 32, 32)
-                    const kidneyMaterial = new THREE.MeshPhongMaterial({
-                        color: 0x6b46c1,
-                        emissive: 0x6b46c1,
-                        emissiveIntensity: 0.3
-                    })
-                    const leftKidney = new THREE.Mesh(kidneyGeometry, kidneyMaterial)
-                    leftKidney.position.set(-0.2, -0.2, 0.15)
-                    leftKidney.name = 'kidney'
-
-                    const rightKidney = new THREE.Mesh(kidneyGeometry, kidneyMaterial)
-                    rightKidney.position.set(0.2, -0.2, 0.15)
-                    rightKidney.name = 'kidney'
-
-                    bodyGroup.add(leftKidney, rightKidney)
-
-                    // Pancreas
-                    const pancreasGeometry = new THREE.BoxGeometry(0.15, 0.05, 0.08)
-                    const pancreasMaterial = new THREE.MeshPhongMaterial({
-                        color: 0xd4af37,
-                        emissive: 0xd4af37,
-                        emissiveIntensity: 0.3
-                    })
-                    const pancreas = new THREE.Mesh(pancreasGeometry, pancreasMaterial)
-                    pancreas.position.set(0, -0.1, 0.1)
-                    pancreas.name = 'pancreas'
-                    bodyGroup.add(pancreas)
-
-                    // Blood vessels (simplified)
-                    const vascularMaterial = new THREE.LineBasicMaterial({
-                        color: 0xa8b5a0,
-                        linewidth: 2
+                    // 1. Load Body/Skin (The Shell)
+                    loader.load('/models/skin.glb', (gltf) => {
+                        const model = gltf.scene
+                        model.traverse((child) => {
+                            if (child.isMesh) {
+                                child.material = new THREE.MeshPhongMaterial({
+                                    color: 0xf5f1e8,
+                                    transparent: true,
+                                    opacity: 0.1,
+                                    side: THREE.DoubleSide
+                                })
+                            }
+                        })
+                        bodyGroup.add(model)
+                    }, undefined, (e) => {
+                        // Fallback if model not found: create simple cylinder
+                        const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.4, 3, 32)
+                        const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xf5f1e8, transparent: true, opacity: 0.1 })
+                        bodyGroup.add(new THREE.Mesh(bodyGeometry, bodyMaterial))
                     })
 
-                    // Create simple vessel network
-                    const points = [
-                        new THREE.Vector3(0, 0.5, 0),
-                        new THREE.Vector3(0, 0.3, 0),
-                        new THREE.Vector3(-0.1, 0.3, 0),
-                        new THREE.Vector3(-0.1, 0, 0),
-                    ]
-                    const geometry = new THREE.BufferGeometry().setFromPoints(points)
-                    const vessels = new THREE.Line(geometry, vascularMaterial)
-                    vessels.name = 'vessels'
-                    bodyGroup.add(vessels)
+                    // 2. Load Heart
+                    loader.load('/models/heart.glb', (gltf) => {
+                        const heart = gltf.scene
+                        heart.position.set(0, 0.5, 0)
+                        heart.scale.set(0.4, 0.4, 0.4)
+                        heart.name = 'heart'
+                        bodyGroup.add(heart)
+
+                        // Add pulsing animation specifically to the heart scene
+                        const pulseScale = 0.4
+                        scene.userData.heartModel = heart
+                    })
+
+                    // 3. Load Pancreas
+                    loader.load('/models/pancreas.glb', (gltf) => {
+                        const pancreas = gltf.scene
+                        pancreas.position.set(0, -0.1, 0.1)
+                        pancreas.scale.set(0.3, 0.3, 0.3)
+                        pancreas.name = 'pancreas'
+                        bodyGroup.add(pancreas)
+                    })
+
+                    // 4. Load Kidneys
+                    loader.load('/models/kidney_left.glb', (gltf) => {
+                        const left = gltf.scene
+                        left.position.set(-0.2, -0.2, 0)
+                        left.scale.set(0.3, 0.3, 0.3)
+                        bodyGroup.add(left)
+                    })
+                    loader.load('/models/kidney_right.glb', (gltf) => {
+                        const right = gltf.scene
+                        right.position.set(0.2, -0.2, 0)
+                        right.scale.set(0.3, 0.3, 0.3)
+                        bodyGroup.add(right)
+                    })
+
+                    // 5. Load Vascular System
+                    loader.load('/models/blood_vasculature.glb', (gltf) => {
+                        const vessels = gltf.scene
+                        vessels.position.set(0, 0, 0)
+                        vessels.scale.set(0.9, 0.9, 0.9)
+                        bodyGroup.add(vessels)
+                    }, undefined, () => {
+                        // Simple vessels fallback
+                        const vascularMaterial = new THREE.LineBasicMaterial({ color: 0xa8b5a0, linewidth: 2 })
+                        const points = [new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1, 0)]
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points)
+                        bodyGroup.add(new THREE.Line(geometry, vascularMaterial))
+                    })
 
                     scene.add(bodyGroup)
 

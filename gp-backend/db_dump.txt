@@ -1,8 +1,0 @@
---- USERS ---
-
---- CONSULTATIONS ---
-ID: 1 | PatientID: 1 | Status: planned | HasPlan: True
-
---- TICKETS ---
-ID: 1 | ConsultID: 1 | PatientID: 1
-ID: 2 | ConsultID: 1 | PatientID: 1
