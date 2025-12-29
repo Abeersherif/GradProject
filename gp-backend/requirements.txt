@@ -12,6 +12,7 @@ python-dotenv==1.0.0
 
 # Utilities
 werkzeug==3.0.1
+gunicorn
 
 # AI & Agents
 langchain
