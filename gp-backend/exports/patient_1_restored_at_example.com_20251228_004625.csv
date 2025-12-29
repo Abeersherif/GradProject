@@ -1,0 +1,128 @@
+
+================================================================================
+PATIENT INFORMATION
+================================================================================
+Field,Value
+Patient ID,1
+Email,restored@example.com
+First Name,Restored
+Last Name,Patient
+Date of Birth,
+Gender,
+Phone,
+Condition Category,COPD
+Registered At,2025-12-27 22:45:46.247935
+
+================================================================================
+MEDICAL PROFILE
+================================================================================
+Diabetes Type,
+Insulin Usage,
+Hba1C,
+Last Glucose,
+Endocrinologist,
+Cardiac Type,
+Cardiologist,
+Last Ecg Date,
+Cardiac Meds,
+Other Conditions,
+Height,
+Weight,
+
+================================================================================
+CONSULTATION HISTORY
+================================================================================
+Total Consultations: 1
+
+--- CONSULTATION 1 ---
+Consultation ID,1
+Status,planned
+Created At,2025-12-27 22:35:13.211376
+Updated At,2025-12-27 22:38:01.375057
+
+Collected Interview Data:
+  Condition Type,copd
+"  Do you get out of breath easily, like when walking up a small hill or hurrying?",yes even 2 floors up i very tired
+  Do you ever have to stop walking just to catch your breath?,yes
+  Are you coughing up any phlegm or mucus today?,yes alot
+  Does your chest feel tight or heavy right now?,yess
+  Is your breathing making it hard to do normal things around the house?,yess
+  Have you had a cold or chest infection that just won't go away lately?,yes and i stayed in hospitsl 3 days
+"  Do you smoke, or have you worked around a lot of smoke, dust, or fumes?",yes i somke 20 years ago
+  breathing,i feel a bit of can;t take my breath right now 
+
+Conversation Transcript:
+  [USER],i feel a bit of can;t take my breath right now 
+  [ASSISTANT],"Do you get out of breath easily, like when walking up a small hill or hurrying?"
+
+AI Analysis Results:
+  Condition,COPD exacerbation with high clinical suspicion
+  Severity,HIGH
+  Recommendations,"1. URGENT MEDICAL EVALUATION REQUIRED: Patient needs immediate assessment in an urgent care or emergency department due to acute worsening of symptoms, recent hospitalization for respiratory infection, and current dyspnea at rest.
+2. BRONCHODILATOR RESCUE THERAPY: If prescribed, use short-acting bronchodilator (albuterol/ipratropium) immediately while arranging transport to medical care.
+3. OXYGEN ASSESSMENT: Check oxygen saturation if pulse oximeter available. If SpO2 < 92%, supplemental oxygen may be needed during transport.
+4. INFECTION MANAGEMENT: Recent hospitalization suggests possible unresolved infection requiring antibiotic evaluation.
+5. SMOKING CESSATION REINFORCEMENT: Despite quitting 20 years ago, reinforce importance of complete avoidance of smoke exposure.
+6. PULMONARY FUNCTION TESTING: Schedule outpatient spirometry for definitive COPD diagnosis once acute episode resolves.
+7. ACTION PLAN DEVELOPMENT: Create written COPD action plan with clear instructions for symptom worsening.
+8. CONSIDER SYSTEMIC CORTICOSTEROIDS: Medical provider should evaluate need for oral steroids to reduce inflammation.
+9. VACCINATION STATUS: Ensure current with pneumococcal and annual influenza vaccines.
+10. PULMONARY REHABILITATION REFERRAL: Once stable, refer to pulmonary rehab for exercise training and education."
+  Reasoning,"Patient presents with multiple high-risk indicators: 1) Acute worsening of chronic respiratory symptoms ('can't take my breath right now') indicating possible exacerbation. 2) Recent hospitalization (3 days) for respiratory infection suggests significant recent illness. 3) Dyspnea at rest reported. 4) Multiple affirmative responses to COPD Assessment Test (CAT)-like questions: breathlessness on minimal exertion (2 floors), stopping to catch breath, productive cough, chest tightness, functional limitation. 5) Significant smoking history (20 years) providing etiology. 6) Symptoms affecting activities of daily living. The combination of acute deterioration, recent hospitalization, and current respiratory distress elevates this to HIGH severity requiring urgent intervention to prevent progression to respiratory failure."
+
+Care Plan:
+  SHORT-TERM PLAN (1-7 days):
+    Daily Actions:
+      -,Monitor symptoms daily
+      -,Stay hydrated
+      -,Follow existing medications
+  LONG-TERM PLAN:
+    Goals:
+      -,Improve overall wellness
+      -,Better condition control
+    Lifestyle Changes:
+      -,Consistent physical activity
+      -,Balanced nutritional intake
+
+
+================================================================================
+MEDICATIONS
+================================================================================
+Total Medications: 0
+
+
+================================================================================
+MEDICAL TICKETS (Doctor Review)
+================================================================================
+Total Tickets: 2
+
+--- TICKET 1 ---
+Ticket ID,1
+Consultation ID,1
+Status,pending_review
+Created At,2025-12-27 22:38:19.680905
+Reviewed By Doctor ID,
+Chief Complaint,"Acute worsening of breathing with sensation of being unable to take a breath, following recent hospitalization for respiratory infection."
+AI Assessment,"High clinical suspicion for COPD exacerbation in patient with 20-year smoking history. Acute deterioration with dyspnea at rest, increased sputum, and functional limitation following recent hospitalization suggests significant exacerbation requiring urgent intervention to prevent respiratory failure."
+Urgency,HIGH
+Doctor Notes,"Patient reports acute respiratory distress. Recent hospitalization indicates unresolved infection or poor recovery. Requires immediate assessment for possible need of bronchodilators, systemic corticosteroids, antibiotics, and oxygen therapy. Outpatient spirometry needed for definitive diagnosis once stabilized. Reinforce smoking cessation despite 20-year quit history."
+
+--- TICKET 2 ---
+Ticket ID,2
+Consultation ID,1
+Status,pending_review
+Created At,2025-12-27 22:38:22.481474
+Reviewed By Doctor ID,
+Chief Complaint,"Acute worsening of breathing with inability to catch breath, following recent hospitalization for chest infection."
+AI Assessment,"HIGH suspicion for COPD exacerbation in patient with 20-year smoking history. Acute deterioration with dyspnea at rest, increased sputum, and functional limitation following recent hospitalization suggests significant exacerbation requiring urgent intervention to prevent respiratory failure."
+Urgency,HIGH
+Doctor Notes,"Patient reports acute 'can't take my breath' sensation now. Recent hospitalization (3 days) for respiratory infection indicates unresolved illness. Needs immediate evaluation for possible bronchodilator therapy, oxygen assessment, infection management, and consideration of systemic corticosteroids. High risk for progression without intervention."
+
+
+================================================================================
+EXPORT METADATA
+================================================================================
+Export Date,2025-12-28 00:46:25
+Export Format,CSV
+MedTwin Version,1.0.0
+================================================================================

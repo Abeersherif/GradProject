@@ -1,0 +1,51 @@
+# MedTwin GitHub Exclusions
+# ========================
+
+# Large Installers
+*.msi
+*.exe
+
+# Python & Environment
+__pycache__/
+*.py[cod]
+venv/
+env/
+.venv/
+.env
+.env.local
+
+# Sensitive Keys & Credentials
+credentials.json
+token.json
+tokens/
+*api_key*
+*API_KEY*
+secrets.py
+
+# Logs & Temporary Files
+*.log
+backend_log.txt
+error_log.txt
+startup_error.txt
+test_results.txt
+*.tmp
+temp/
+tmp/
+
+# UI/Frontend Build Files
+node_modules/
+dist/
+build/
+.next/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Documentation Binaries & Files
+*.pdf
+*.pptx
+*.docx
+*.md
+!gp-backend/README.md
+!medtwin-react/README.md

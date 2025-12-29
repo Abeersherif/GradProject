@@ -1,0 +1,20 @@
+[0] (500,474)<div  />
+	[1] (99,52)<a class='logo' href='/' />
+		[2] (122,52)<span >MedTwin />
+	[3] (738,52)<a class='nav-login' href='/login'>Login />
+	[4] (893,52)<a class='btn btn-primary' href='/signup'>Get Started />
+	Choose Your Role
+	Select how you'll be using MedTwin
+	[5] (500,339)<div  />
+		[6] (500,203)<div  />
+		[7] (500,322)<h3 >Patient />
+		[8] (500,376)<p >Monitor your health, get AI-powered insights, and manage your care plan. />
+		[9] (500,484)<div  />
+			[10] (500,442)<div >✓ Health monitoring />
+			[11] (500,484)<div >✓ AI consultations />
+			[12] (500,525)<div >✓ Medication tracking />
+	[13] (500,869)<div  />
+		[14] (500,733)<div  />
+		[15] (500,852)<h3 >Doctor />
+		[16] (500,905)<p >Access AI-assisted diagnostics, manage patients, and streamline your workflow. />
+		[17] (500,971)<div >✓ Patient management />

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - MedTwin</title>
+    <meta name="description" content="Join MedTwin - Start your journey to intelligent healthcare.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Back to Home -->
+    <a href="index.html" class="back-home">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M15 10L5 10M5 10L9 6M5 10L9 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+        </svg>
+        Back to Home
+    </a>
+
+    <!-- Sign Up Container -->
+    <div class="auth-container signup-container">
+        <!-- Progress Stepper -->
+        <div class="stepper">
+            <div class="stepper-item active" data-step="1">
+                <div class="stepper-number">1</div>
+                <div class="stepper-label">Choose Role</div>
+            </div>
+            <div class="stepper-line"></div>
+            <div class="stepper-item" data-step="2">
+                <div class="stepper-number">2</div>
+                <div class="stepper-label">Your Details</div>
+            </div>
+            <div class="stepper-line"></div>
+            <div class="stepper-item" data-step="3">
+                <div class="stepper-number">3</div>
+                <div class="stepper-label">Review</div>
+            </div>
+        </div>
+
+        <!-- Form Container -->
+        <div class="signup-form-container">
+            <form class="signup-form" id="signupForm">
+
+                <!-- Step 1: Role Selection -->
+                <div class="form-step active" data-step="1">
+                    <div class="step-header">
+                        <h2 class="step-title">Choose Your Role</h2>
+                        <p class="step-description">Select how you'll be using MedTwin</p>
+                    </div>
+
+                    <div class="role-cards">
+                        <label class="role-card" data-role="patient">
+                            <input type="radio" name="role" value="patient" class="role-input">
+                            <div class="role-card-content">
+                                <div class="role-icon patient-icon">
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                        <circle cx="24" cy="14" r="8" stroke="currentColor" stroke-width="2.5" />
+                                        <path d="M10 38C10 30 15 26 24 26C33 26 38 30 38 38" stroke="currentColor"
+                                            stroke-width="2.5" stroke-linecap="round" />
+                                    </svg>
+                                </div>
+                                <h3 class="role-title">Patient</h3>
+                                <p class="role-description">
+                                    Monitor your health, get AI-powered insights, and manage your care plan.
+                                </p>
+                                <div class="role-features">
+                                    <div class="role-feature">✓ Health monitoring</div>
+                                    <div class="role-feature">✓ AI consultations</div>
+                                    <div class="role-feature">✓ Medication tracking</div>
+                                </div>
+                            </div>
+                            <div class="role-check">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="3"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                        </label>
+
+                        <label class="role-card" data-role="doctor">
+                            <input type="radio" name="role" value="doctor" class="role-input">
+                            <div class="role-card-content">
+                                <div class="role-icon doctor-icon">
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                        <path d="M24 8L24 40M8 24L40 24" stroke="currentColor" stroke-width="2.5"
+                                            stroke-linecap="round" />
+                                        <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="2.5" />
+                                    </svg>
+                                </div>
+                                <h3 class="role-title">Doctor</h3>
+                                <p class="role-description">
+                                    Access AI-assisted diagnostics, manage patients, and streamline your workflow.
+                                </p>
+                                <div class="role-features">
+                                    <div class="role-feature">✓ Patient management</div>
+                                    <div class="role-feature">✓ AI assistance</div>
+                                    <div class="role-feature">✓ Clinical insights</div>
+                                </div>
+                            </div>
+                            <div class="role-check">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="3"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+
+                    <button type="button" class="btn-next" onclick="nextStep()">
+                        Continue
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Step 2: Patient Details -->
+                <div class="form-step" data-step="2" data-role="patient">
+                    <div class="step-header">
+                        <h2 class="step-title">Your Information</h2>
+                        <p class="step-description">Tell us a bit about yourself</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" id="firstName" name="firstName" class="form-input" placeholder="John"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" class="form-input" placeholder="Doe"
+                                required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="+1 (555) 000-0000"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select id="gender" name="gender" class="form-input" required>
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer-not-to-say">Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bloodType" class="form-label">Blood Type</label>
+                            <select id="bloodType" name="bloodType" class="form-input">
+                                <option value="">Select blood type</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" name="password" class="form-input"
+                                placeholder="Create a strong password" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-input"
+                                placeholder="Re-enter your password" required>
+                        </div>
+                    </div>
+
+                    <div class="step-buttons">
+                        <button type="button" class="btn-back" onclick="prevStep()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M13 17L6 10L13 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            Back
+                        </button>
+                        <button type="button" class="btn-next" onclick="nextStep()">
+                            Continue
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Doctor Details -->
+                <div class="form-step" data-step="2" data-role="doctor">
+                    <div class="step-header">
+                        <h2 class="step-title">Professional Information</h2>
+                        <p class="step-description">Verify your medical credentials</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="doctorFirstName" class="form-label">First Name</label>
+                            <input type="text" id="doctorFirstName" name="firstName" class="form-input"
+                                placeholder="Dr. John" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="doctorLastName" class="form-label">Last Name</label>
+                            <input type="text" id="doctorLastName" name="lastName" class="form-input"
+                                placeholder="Smith" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="doctorEmail" class="form-label">Professional Email</label>
+                            <input type="email" id="doctorEmail" name="email" class="form-input"
+                                placeholder="dr.smith@hospital.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="licenseNumber" class="form-label">Medical License Number</label>
+                            <input type="text" id="licenseNumber" name="licenseNumber" class="form-input"
+                                placeholder="ML123456" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="specialty" class="form-label">Specialty</label>
+                            <select id="specialty" name="specialty" class="form-input" required>
+                                <option value="">Select specialty</option>
+                                <option value="cardiology">Cardiology</option>
+                                <option value="pulmonology">Pulmonology</option>
+                                <option value="endocrinology">Endocrinology</option>
+                                <option value="general">General Practice</option>
+                                <option value="internal">Internal Medicine</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="hospital" class="form-label">Hospital/Clinic</label>
+                            <input type="text" id="hospital" name="hospital" class="form-input"
+                                placeholder="City General Hospital" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="yearsExperience" class="form-label">Years of Experience</label>
+                            <input type="number" id="yearsExperience" name="yearsExperience" class="form-input"
+                                placeholder="10" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="doctorPhone" class="form-label">Phone Number</label>
+                            <input type="tel" id="doctorPhone" name="phone" class="form-input"
+                                placeholder="+1 (555) 000-0000" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="doctorPassword" class="form-label">Password</label>
+                            <input type="password" id="doctorPassword" name="password" class="form-input"
+                                placeholder="Create a strong password" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="doctorConfirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" id="doctorConfirmPassword" name="confirmPassword" class="form-input"
+                                placeholder="Re-enter your password" required>
+                        </div>
+                    </div>
+
+                    <div class="step-buttons">
+                        <button type="button" class="btn-back" onclick="prevStep()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M13 17L6 10L13 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            Back
+                        </button>
+                        <button type="button" class="btn-next" onclick="nextStep()">
+                            Continue
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Review -->
+                <div class="form-step" data-step="3">
+                    <div class="step-header">
+                        <h2 class="step-title">Review & Confirm</h2>
+                        <p class="step-description">Please review your information before submitting</p>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-section">
+                            <h3 class="review-section-title">Account Type</h3>
+                            <div class="review-item">
+                                <span class="review-label">Role:</span>
+                                <span class="review-value" id="reviewRole">-</span>
+                            </div>
+                        </div>
+
+                        <div class="review-section">
+                            <h3 class="review-section-title">Personal Information</h3>
+                            <div class="review-item">
+                                <span class="review-label">Name:</span>
+                                <span class="review-value" id="reviewName">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Email:</span>
+                                <span class="review-value" id="reviewEmail">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Phone:</span>
+                                <span class="review-value" id="reviewPhone">-</span>
+                            </div>
+                        </div>
+
+                        <div class="review-section" id="patientReviewSection" style="display: none;">
+                            <h3 class="review-section-title">Health Information</h3>
+                            <div class="review-item">
+                                <span class="review-label">Date of Birth:</span>
+                                <span class="review-value" id="reviewDOB">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Gender:</span>
+                                <span class="review-value" id="reviewGender">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Blood Type:</span>
+                                <span class="review-value" id="reviewBloodType">-</span>
+                            </div>
+                        </div>
+
+                        <div class="review-section" id="doctorReviewSection" style="display: none;">
+                            <h3 class="review-section-title">Professional Information</h3>
+                            <div class="review-item">
+                                <span class="review-label">License Number:</span>
+                                <span class="review-value" id="reviewLicense">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Specialty:</span>
+                                <span class="review-value" id="reviewSpecialty">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Hospital/Clinic:</span>
+                                <span class="review-value" id="reviewHospital">-</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Experience:</span>
+                                <span class="review-value" id="reviewExperience">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="terms-checkbox">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="terms" class="checkbox-input" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">
+                                I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#"
+                                    class="terms-link">Privacy Policy</a>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="step-buttons">
+                        <button type="button" class="btn-back" onclick="prevStep()">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M13 17L6 10L13 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            Back
+                        </button>
+                        <button type="submit" class="btn-submit">
+                            Create Account
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M5 10L8 13L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- Already have account -->
+            <div class="auth-footer">
+                <p>Already have an account? <a href="login.html" class="auth-link">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="signup.js"></script>
+</body>
+
+</html>
