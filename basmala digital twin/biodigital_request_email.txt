@@ -1,0 +1,33 @@
+Subject: Academic Developer API Access Request - Graduation Project (MedTwin Digital Twin)
+
+Dear BioDigital Team,
+
+I am a university student working on my graduation project called **MedTwin** - a Digital Twin platform for chronic disease management focusing on Type 2 Diabetes.
+
+**Project Overview:**
+MedTwin creates personalized digital representations of patients to visualize organ health and predict disease progression over time. We use AI-driven analysis to help patients and healthcare providers understand diabetes complications affecting organs like the heart, kidneys, pancreas, and eyes.
+
+**Why BioDigital:**
+Your "Systemic Insulin and Glucose in Type 2 Diabetes" model is exactly what we need to provide professional, medically-accurate 3D visualization. We would like to integrate the BioDigital Human API to:
+- Display organ health status with color-coded risk indicators
+- Allow users to interact with specific organs (heart, pancreas, kidneys, eyes)
+- Connect the visualization to our backend digital twin data
+
+**Request:**
+We are requesting academic/educational access to the BioDigital Developer API for our graduation project. This is a non-commercial, educational project that will be demonstrated to our university examination committee.
+
+**Project Details:**
+- University: [YOUR UNIVERSITY NAME]
+- Project: MedTwin - Chronic Disease Digital Twin
+- Duration: [PROJECT DURATION]
+- Purpose: Academic/Educational (Graduation Project)
+- Team Size: [NUMBER OF TEAM MEMBERS]
+
+We would greatly appreciate any academic licensing, trial access, or educational partnership opportunity that would allow us to use the Developer API.
+
+Thank you for your consideration.
+
+Best regards,
+[YOUR NAME]
+[YOUR EMAIL]
+[YOUR UNIVERSITY]
