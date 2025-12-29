@@ -1,14 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import './DigitalTwinPage.css'
 
 const DigitalTwinPage = () => {
     const [userData, setUserData] = useState(null)
     const [simulationData, setSimulationData] = useState(null)
     const [loading, setLoading] = useState(false)
-    const [selectedOrgan, setSelectedOrgan] = useState('all')
     const [timelineYear, setTimelineYear] = useState(2025)
     const canvasRef = useRef(null)
+    const rendererRef = useRef(null)
     const sceneRef = useRef(null)
+    const bodyGroupRef = useRef(new THREE.Group())
+    const heartModelRef = useRef(null)
 
     useEffect(() => {
         const savedUserStr = localStorage.getItem('patientUser') || localStorage.getItem('user')
@@ -16,7 +21,6 @@ const DigitalTwinPage = () => {
             try {
                 const parsed = JSON.parse(savedUserStr)
                 setUserData(parsed)
-                // Trigger initial simulation for current year
                 runSimulation(parsed.id, 0)
             } catch (err) {
                 console.error('Failed to parse user data:', err)
@@ -30,7 +34,6 @@ const DigitalTwinPage = () => {
             const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin.onrender.com';
             const BASE = VITE_API_URL.endsWith('/api') ? VITE_API_URL : `${VITE_API_URL}/api`;
 
-            // Call the correct visualization-data endpoint
             const response = await fetch(`${BASE}/twin/${patientId}/visualization-data?years_ahead=${yearsAhead}`, {
                 method: 'GET',
                 headers: {
@@ -43,8 +46,6 @@ const DigitalTwinPage = () => {
 
             const data = await response.json()
             setSimulationData(data)
-
-            // Update 3D model colors based on organ status
             updateModelColors(data.organs)
         } catch (error) {
             console.error('Simulation error:', error)
@@ -54,9 +55,9 @@ const DigitalTwinPage = () => {
     }
 
     const updateModelColors = (organs) => {
-        if (!sceneRef.current || !organs) return
+        if (!bodyGroupRef.current || !organs) return
 
-        sceneRef.current.traverse((child) => {
+        bodyGroupRef.current.traverse((child) => {
             if (child.isMesh && child.name) {
                 const name = child.name.toLowerCase()
                 let color = null
@@ -69,8 +70,10 @@ const DigitalTwinPage = () => {
                 if (color) {
                     const mappedColor = color === 'red' ? 0xff4d4d : color === 'yellow' ? 0xffcc00 : 0x00ff88
                     child.material.color.setHex(mappedColor)
-                    child.material.emissive = new (sceneRef.current.constructor).Color(mappedColor)
-                    child.material.emissiveIntensity = 0.2
+                    if (child.material.emissive) {
+                        child.material.emissive.setHex(mappedColor)
+                        child.material.emissiveIntensity = 0.2
+                    }
                 }
             }
         })
@@ -84,134 +87,120 @@ const DigitalTwinPage = () => {
         }
     }
 
-    // Initialize 3D scene
     useEffect(() => {
         if (!canvasRef.current) return
 
-        import('three').then(THREE => {
-            import('three/examples/jsm/loaders/GLTFLoader').then(({ GLTFLoader }) => {
-                import('three/examples/jsm/controls/OrbitControls').then(({ OrbitControls }) => {
-                    const canvas = canvasRef.current
-                    const scene = new THREE.Scene()
-                    sceneRef.current = scene
-                    scene.background = new THREE.Color(0x0a0a0d)
+        const canvas = canvasRef.current
+        const scene = new THREE.Scene()
+        sceneRef.current = scene
+        scene.background = new THREE.Color(0x0a0a0d)
 
-                    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
-                    camera.position.set(0, 1.2, 3.5)
+        const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
+        camera.position.set(0, 1.2, 3.5)
 
-                    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-                    renderer.setSize(canvas.clientWidth, canvas.clientHeight)
-                    renderer.setPixelRatio(window.devicePixelRatio)
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight)
+        renderer.setPixelRatio(window.devicePixelRatio)
+        rendererRef.current = renderer
 
-                    // Better lighting for medical aesthetic
-                    scene.add(new THREE.AmbientLight(0xffffff, 0.4))
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4))
+        const frontLight = new THREE.PointLight(0xffffff, 0.8)
+        frontLight.position.set(0, 2, 4)
+        scene.add(frontLight)
 
-                    const frontLight = new THREE.PointLight(0xffffff, 0.8)
-                    frontLight.position.set(0, 2, 4)
-                    scene.add(frontLight)
+        const rimLight = new THREE.DirectionalLight(0x4080ff, 0.5)
+        rimLight.position.set(-2, 2, -2)
+        scene.add(rimLight)
 
-                    const rimLight = new THREE.DirectionalLight(0x4080ff, 0.5)
-                    rimLight.position.set(-2, 2, -2)
-                    scene.add(rimLight)
+        const controls = new OrbitControls(camera, canvas)
+        controls.enableDamping = true
+        controls.dampingFactor = 0.05
+        controls.minDistance = 1.5
+        controls.maxDistance = 6
+        controls.target.set(0, 1, 0)
 
-                    const controls = new OrbitControls(camera, canvas)
-                    controls.enableDamping = true
-                    controls.dampingFactor = 0.05
-                    controls.minDistance = 1.5
-                    controls.maxDistance = 6
-                    controls.target.set(0, 1, 0)
+        const bodyGroup = bodyGroupRef.current
+        scene.add(bodyGroup)
 
-                    const bodyGroup = new THREE.Group()
-                    const loader = new GLTFLoader()
+        const loader = new GLTFLoader()
+        const isFemale = userData?.gender?.toLowerCase() === 'female' || userData?.sex?.toLowerCase() === 'female'
+        const suffix = isFemale ? '_female' : ''
 
-                    // Handle gender models
-                    const isFemale = userData?.gender?.toLowerCase() === 'female' || userData?.sex?.toLowerCase() === 'female'
-                    const suffix = isFemale ? '_female' : ''
-
-                    // 1. Load Body
-                    loader.load(`/models/skin${suffix}.glb`, (gltf) => {
-                        const model = gltf.scene
-                        model.traverse((child) => {
-                            if (child.isMesh) {
-                                child.material = new THREE.MeshPhongMaterial({
-                                    color: 0x1a2a4a,
-                                    transparent: true,
-                                    opacity: 0.15,
-                                    side: THREE.DoubleSide
-                                })
-                            }
-                        })
-                        bodyGroup.add(model)
-                    }, undefined, () => {
-                        const geo = new THREE.CylinderGeometry(0.5, 0.4, 2.5, 32)
-                        bodyGroup.add(new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color: 0x112233, transparent: true, opacity: 0.2 })))
+        // 1. Load Body
+        loader.load(`/models/skin${suffix}.glb`, (gltf) => {
+            const model = gltf.scene
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshPhongMaterial({
+                        color: 0x1a2a4a,
+                        transparent: true,
+                        opacity: 0.15,
+                        side: THREE.DoubleSide
                     })
+                }
+            })
+            bodyGroup.add(model)
+        })
 
-                    // 2. Load Internal Organs
-                    const organs = [
-                        { name: 'heart', file: `heart${suffix}.glb` },
-                        { name: 'pancreas', file: `pancreas${suffix}.glb` },
-                        { name: 'kidney_left', file: `kidney_left${suffix}.glb` },
-                        { name: 'kidney_right', file: `kidney_right${suffix}.glb` },
-                        { name: 'eye_left', file: `eye_left${suffix}.glb` },
-                        { name: 'eye_right', file: `eye_right${suffix}.glb` },
-                        { name: 'vasculature', file: `blood_vasculature.glb` }
-                    ]
+        // 2. Load Internal Organs
+        const organs = [
+            { name: 'heart', file: `heart${suffix}.glb` },
+            { name: 'pancreas', file: `pancreas${suffix}.glb` },
+            { name: 'kidney_left', file: `kidney_left${suffix}.glb` },
+            { name: 'kidney_right', file: `kidney_right${suffix}.glb` },
+            { name: 'eye_left', file: `eye_left${suffix}.glb` },
+            { name: 'eye_right', file: `eye_right${suffix}.glb` },
+            { name: 'vasculature', file: `blood_vasculature.glb` }
+        ]
 
-                    organs.forEach(org => {
-                        loader.load(`/models/${org.file}`, (gltf) => {
-                            const model = gltf.scene
-                            model.name = org.name
-                            model.traverse(child => {
-                                if (child.isMesh) {
-                                    child.material = new THREE.MeshPhongMaterial({
-                                        color: 0x444444,
-                                        shininess: 50
-                                    })
-                                }
-                            })
-                            bodyGroup.add(model)
-                            if (org.name === 'heart') scene.userData.heartModel = model
+        organs.forEach(org => {
+            loader.load(`/models/${org.file}`, (gltf) => {
+                const model = gltf.scene
+                model.name = org.name
+                model.traverse(child => {
+                    if (child.isMesh) {
+                        child.material = new THREE.MeshPhongMaterial({
+                            color: 0x444444,
+                            shininess: 50
                         })
-                    })
-
-                    scene.add(bodyGroup)
-
-                    let animationId
-                    const animate = () => {
-                        animationId = requestAnimationFrame(animate)
-                        bodyGroup.rotation.y += 0.001
-
-                        if (scene.userData.heartModel) {
-                            const scale = 1.0 + Math.sin(Date.now() * 0.002) * 0.01 // Very subtle pulse
-                            scene.userData.heartModel.scale.set(scale, scale, scale)
-                        }
-
-                        controls.update()
-                        renderer.render(scene, camera)
-                    }
-                    animate()
-
-                    const handleResize = () => {
-                        camera.aspect = canvas.clientWidth / canvas.clientHeight
-                        camera.updateProjectionMatrix()
-                        renderer.setSize(canvas.clientWidth, canvas.clientHeight)
-                    }
-                    window.addEventListener('resize', handleResize)
-
-                    return () => {
-                        window.removeEventListener('resize', handleResize)
-                        cancelAnimationFrame(animationId)
-                        renderer.dispose()
+                        child.name = org.name // Preserve name for traversal
                     }
                 })
+                bodyGroup.add(model)
+                if (org.name === 'heart') heartModelRef.current = model
             })
         })
-    }, [userData])
 
-    const fullName = userData?.firstName && userData?.lastName
-        ? `${userData.firstName} ${userData.lastName}`
-        : (userData?.fullName || userData?.full_name || 'Guest User')
+        let animationId
+        const animate = () => {
+            animationId = requestAnimationFrame(animate)
+            bodyGroup.rotation.y += 0.001
+
+            if (heartModelRef.current) {
+                const scale = 1.0 + Math.sin(Date.now() * 0.002) * 0.02
+                heartModelRef.current.scale.set(scale, scale, scale)
+            }
+
+            controls.update()
+            renderer.render(scene, camera)
+        }
+        animate()
+
+        const handleResize = () => {
+            if (!canvasRef.current) return
+            camera.aspect = canvas.clientWidth / canvas.clientHeight
+            camera.updateProjectionMatrix()
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight)
+        }
+        window.addEventListener('resize', handleResize)
+
+        return () => {
+            window.removeEventListener('resize', handleResize)
+            cancelAnimationFrame(animationId)
+            bodyGroup.clear() // Remove children
+            rendererRef.current?.dispose()
+        }
+    }, [userData])
 
     return (
         <div className="twin-page-v2">
@@ -235,7 +224,7 @@ const DigitalTwinPage = () => {
                                 </div>
                                 <div className="status-dot online"></div>
                             </div>
-                            <button className="load-btn">LOAD</button>
+                            <button className="load-btn" onClick={() => runSimulation(userData?.id, 0)}>REFRESH</button>
                         </section>
 
                         <section className="biometrics-grid">
@@ -280,8 +269,8 @@ const DigitalTwinPage = () => {
                                 <div className="ai-btn-content">
                                     <span className="brain-icon">🧠</span>
                                     <div className="ai-text">
-                                        <p className="main">View AI Analysis</p>
-                                        <p className="sub">Cognitive System {simulationData ? 'Online' : 'Offline'}...</p>
+                                        <p className="main">AI Simulation Ready</p>
+                                        <p className="sub">{loading ? 'Processing...' : 'Cognitive System Active'}</p>
                                     </div>
                                     <span className="arrow">→</span>
                                 </div>
@@ -298,7 +287,7 @@ const DigitalTwinPage = () => {
                     <aside className="right-panel">
                         <div className="organs-list-card glass-card">
                             <h3>Organ Systems</h3>
-                            <p className="sub-hint">Click organ to focus</p>
+                            <p className="sub-hint">Real-time status analysis</p>
 
                             <div className="organ-status-rows">
                                 <div className="status-row">
@@ -336,7 +325,7 @@ const DigitalTwinPage = () => {
                             <div className="view-controls-hint">
                                 <p><span>🖱️</span> ROTATE: Drag</p>
                                 <p><span>🔍</span> ZOOM: Scroll</p>
-                                <p><span>🎯</span> FOCUS: Click organ</p>
+                                <p><span>🎯</span> PREDICTION: Use Slider</p>
                             </div>
                         </div>
                     </aside>
