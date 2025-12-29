@@ -67,12 +67,14 @@ const DigitalTwinPage = () => {
                     // 1. Load Body/Skin (The Shell)
                     loader.load('/models/skin.glb', (gltf) => {
                         const model = gltf.scene
+                        model.position.set(0, 0, 0)
+                        model.scale.set(1, 1, 1)
                         model.traverse((child) => {
                             if (child.isMesh) {
                                 child.material = new THREE.MeshPhongMaterial({
-                                    color: 0xf5f1e8,
+                                    color: 0xcccccc,
                                     transparent: true,
-                                    opacity: 0.1,
+                                    opacity: 0.15,
                                     side: THREE.DoubleSide
                                 })
                             }
@@ -88,21 +90,20 @@ const DigitalTwinPage = () => {
                     // 2. Load Heart
                     loader.load('/models/heart.glb', (gltf) => {
                         const heart = gltf.scene
-                        heart.position.set(0, 0.5, 0)
-                        heart.scale.set(0.4, 0.4, 0.4)
+                        heart.position.set(0, 0, 0)
+                        heart.scale.set(1, 1, 1)
                         heart.name = 'heart'
                         bodyGroup.add(heart)
 
                         // Add pulsing animation specifically to the heart scene
-                        const pulseScale = 0.4
                         scene.userData.heartModel = heart
                     })
 
                     // 3. Load Pancreas
                     loader.load('/models/pancreas.glb', (gltf) => {
                         const pancreas = gltf.scene
-                        pancreas.position.set(0, -0.1, 0.1)
-                        pancreas.scale.set(0.3, 0.3, 0.3)
+                        pancreas.position.set(0, 0, 0)
+                        pancreas.scale.set(1, 1, 1)
                         pancreas.name = 'pancreas'
                         bodyGroup.add(pancreas)
                     })
@@ -110,14 +111,14 @@ const DigitalTwinPage = () => {
                     // 4. Load Kidneys
                     loader.load('/models/kidney_left.glb', (gltf) => {
                         const left = gltf.scene
-                        left.position.set(-0.2, -0.2, 0)
-                        left.scale.set(0.3, 0.3, 0.3)
+                        left.position.set(0, 0, 0)
+                        left.scale.set(1, 1, 1)
                         bodyGroup.add(left)
                     })
                     loader.load('/models/kidney_right.glb', (gltf) => {
                         const right = gltf.scene
-                        right.position.set(0.2, -0.2, 0)
-                        right.scale.set(0.3, 0.3, 0.3)
+                        right.position.set(0, 0, 0)
+                        right.scale.set(1, 1, 1)
                         bodyGroup.add(right)
                     })
 
@@ -125,7 +126,7 @@ const DigitalTwinPage = () => {
                     loader.load('/models/blood_vasculature.glb', (gltf) => {
                         const vessels = gltf.scene
                         vessels.position.set(0, 0, 0)
-                        vessels.scale.set(0.9, 0.9, 0.9)
+                        vessels.scale.set(1, 1, 1)
                         bodyGroup.add(vessels)
                     }, undefined, () => {
                         // Simple vessels fallback
@@ -148,7 +149,7 @@ const DigitalTwinPage = () => {
                         // Pulse effect on heart (only if loaded)
                         const heartModel = scene.userData.heartModel
                         if (heartModel) {
-                            const pulse = Math.sin(Date.now() * 0.003) * 0.05 + 0.4 // Pulse around the scale scale 0.4
+                            const pulse = Math.sin(Date.now() * 0.003) * 0.03 + 1.0
                             heartModel.scale.set(pulse, pulse, pulse)
                         }
 
