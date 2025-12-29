@@ -95,7 +95,7 @@ const DigitalTwinPage = () => {
         const canvas = canvasRef.current
         const scene = new THREE.Scene()
         sceneRef.current = scene
-        scene.background = new THREE.Color(0x0a0a0d)
+        scene.background = new THREE.Color(0x1a1a2e) // Lighter background
 
         const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
         camera.position.set(0, 1.2, 3.5)
@@ -105,14 +105,24 @@ const DigitalTwinPage = () => {
         renderer.setPixelRatio(window.devicePixelRatio)
         rendererRef.current = renderer
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.4))
-        const frontLight = new THREE.PointLight(0xffffff, 0.8)
+        // MUCH brighter lighting
+        scene.add(new THREE.AmbientLight(0xffffff, 1.2)) // Increased from 0.4
+
+        const frontLight = new THREE.PointLight(0xffffff, 1.5) // Increased from 0.8
         frontLight.position.set(0, 2, 4)
         scene.add(frontLight)
 
-        const rimLight = new THREE.DirectionalLight(0x4080ff, 0.5)
+        const backLight = new THREE.PointLight(0xffffff, 1.0) // Added back light
+        backLight.position.set(0, 1, -3)
+        scene.add(backLight)
+
+        const rimLight = new THREE.DirectionalLight(0x6699ff, 0.8) // Increased from 0.5
         rimLight.position.set(-2, 2, -2)
         scene.add(rimLight)
+
+        const topLight = new THREE.DirectionalLight(0xffffff, 0.6) // New top light
+        topLight.position.set(0, 5, 0)
+        scene.add(topLight)
 
         const controls = new OrbitControls(camera, canvas)
         controls.enableDamping = true
@@ -159,11 +169,21 @@ const DigitalTwinPage = () => {
             loader.load(`/models/${org.file}`, (gltf) => {
                 const model = gltf.scene
                 model.name = org.name
+
+                // Assign realistic colors to organs
+                let organColor = 0xcc8899 // Default pinkish
+                if (org.name === 'heart') organColor = 0xcc4444
+                if (org.name === 'pancreas') organColor = 0xddaa66
+                if (org.name.includes('kidney')) organColor = 0x884444
+                if (org.name.includes('eye')) organColor = 0xeeeeff
+                if (org.name === 'vasculature') organColor = 0xff6666
+
                 model.traverse(child => {
                     if (child.isMesh) {
                         child.material = new THREE.MeshPhongMaterial({
-                            color: 0x444444,
-                            shininess: 50
+                            color: organColor,
+                            shininess: 80,
+                            specular: 0x222222
                         })
                         child.name = org.name // Preserve name for traversal
                     }
