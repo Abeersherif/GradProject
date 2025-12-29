@@ -184,7 +184,8 @@ const DigitalTwinPage = () => {
 
         setLoading(true)
         try {
-            const response = await fetch('http://localhost:5000/api/digital-twin/simulate', {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://medtwin.onrender.com'
+            const response = await fetch(`${API_BASE_URL}/api/digital-twin/simulate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
