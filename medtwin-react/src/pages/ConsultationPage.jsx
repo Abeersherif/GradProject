@@ -206,7 +206,18 @@ const ConsultationPage = () => {
                     } catch (err) { console.error(err); setIsTyping(false) }
                 }, 2000)
 
-            } catch (err) { console.error(err) }
+            } catch (err) {
+                console.error("Analysis Error:", err);
+                setMessages(prev => [...prev, {
+                    id: 'analysis-error',
+                    sender: 'agent',
+                    agentName: 'System',
+                    agentIcon: '⚠️',
+                    text: "The analysis is taking longer than expected due to server load. Please check your medical ticket in the dashboard in a few moments, or try again.",
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }]);
+                setIsTyping(false);
+            }
         }, 1500)
     }
 
