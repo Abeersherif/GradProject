@@ -142,17 +142,20 @@ const DigitalTwinPage = () => {
         // 1. Load Body
         loader.load(`/models/skin${suffix}.glb`, (gltf) => {
             const model = gltf.scene
+            console.log('✅ Body model loaded successfully')
             model.traverse((child) => {
                 if (child.isMesh) {
                     child.material = new THREE.MeshPhongMaterial({
-                        color: 0x2a3a5a,
+                        color: 0x4a5a7a,
                         transparent: true,
-                        opacity: 0.2,
+                        opacity: 0.35,
                         side: THREE.DoubleSide
                     })
                 }
             })
             bodyGroup.add(model)
+        }, undefined, (error) => {
+            console.error('❌ Failed to load body model:', error)
         })
 
         // 2. Load Internal Organs
@@ -170,6 +173,7 @@ const DigitalTwinPage = () => {
             loader.load(`/models/${org.file}`, (gltf) => {
                 const model = gltf.scene
                 model.name = org.name
+                console.log(`✅ Loaded ${org.name}`)
 
                 // Assign realistic colors to organs
                 let organColor = 0xcc8899 // Default pinkish
@@ -191,6 +195,8 @@ const DigitalTwinPage = () => {
                 })
                 bodyGroup.add(model)
                 if (org.name === 'heart') heartModelRef.current = model
+            }, undefined, (error) => {
+                console.error(`❌ Failed to load ${org.name}:`, error)
             })
         })
 
