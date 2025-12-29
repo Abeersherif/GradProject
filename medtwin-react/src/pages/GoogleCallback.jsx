@@ -13,7 +13,7 @@ const GoogleCallback = () => {
                 try {
                     // Send code to backend to exchange for token
                     // The backend route is /api/calendar/callback but we can redirect or call it
-                    window.location.href = `http://localhost:5000/api/calendar/callback?code=${code}`
+                    window.location.href = `https://medtwin.onrender.com/api/calendar/callback?code=${code}`
                 } catch (error) {
                     console.error("Auth failed:", error)
                     navigate('/consultation')
