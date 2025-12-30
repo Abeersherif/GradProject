@@ -123,9 +123,11 @@ const DigitalTwinPage = () => {
         controls.target.set(0, 0, 0)
 
         const bodyGroup = bodyGroupRef.current
+        // Clear any existing models to prevent duplicates
+        while (bodyGroup.children.length > 0) {
+            bodyGroup.remove(bodyGroup.children[0])
+        }
         bodyGroup.scale.set(0.8, 0.8, 0.8) // Balanced scale
-
-
 
         scene.add(bodyGroup)
 
@@ -226,9 +228,11 @@ const DigitalTwinPage = () => {
             window.removeEventListener('resize', handleResize)
             cancelAnimationFrame(animationId)
             bodyGroup.clear() // Remove children
-            rendererRef.current?.dispose()
+            scene.clear()
+            controls.dispose()
+            renderer.dispose()
         }
-    }, [userData])
+    }, []) // Only run once on mount
 
     return (
         <div className="twin-page-v2">
