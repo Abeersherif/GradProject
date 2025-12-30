@@ -33,14 +33,15 @@ const DigitalTwinPage = () => {
     const runSimulation = async (patientId, yearsAhead = 0) => {
         setLoading(true)
         try {
-            const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin.onrender.com';
+            const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin-backend.onrender.com';
             const BASE = VITE_API_URL.endsWith('/api') ? VITE_API_URL : `${VITE_API_URL}/api`;
+            const token = localStorage.getItem('patientToken') || localStorage.getItem('authToken');
 
             const response = await fetch(`${BASE}/twin/${patientId}/visualization-data?years_ahead=${yearsAhead}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${token}`
                 }
             })
 
@@ -60,21 +61,23 @@ const DigitalTwinPage = () => {
         if (!bodyGroupRef.current || !organs) return
 
         bodyGroupRef.current.traverse((child) => {
-            if (child.isMesh && child.name) {
-                const name = child.name.toLowerCase()
+            if (child.isMesh && (child.name || child.parent?.name)) {
+                // Check both child name and parent name (common in GLTF)
+                const name = (child.name || child.parent?.name || '').toLowerCase()
                 let color = null
 
                 if (name.includes('heart')) color = organs.heart?.color
                 if (name.includes('pancreas')) color = organs.pancreas?.color
                 if (name.includes('kidney')) color = organs.kidneys?.color
                 if (name.includes('vessel') || name.includes('blood')) color = organs.vessels?.color
+                if (name.includes('eye')) color = organs.eyes?.color
 
                 if (color) {
                     const mappedColor = color === 'red' ? 0xff4d4d : color === 'yellow' ? 0xffcc00 : 0x00ff88
                     child.material.color.setHex(mappedColor)
                     if (child.material.emissive) {
                         child.material.emissive.setHex(mappedColor)
-                        child.material.emissiveIntensity = 0.2
+                        child.material.emissiveIntensity = 0.3
                     }
                 }
             }
@@ -95,44 +98,32 @@ const DigitalTwinPage = () => {
         const canvas = canvasRef.current
         const scene = new THREE.Scene()
         sceneRef.current = scene
-        scene.background = new THREE.Color(0x1a1a2e) // Lighter background
+        scene.background = new THREE.Color(0x0a0a14)
 
         const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
-        camera.position.set(0, 1.2, 3.5)
+        camera.position.set(0, 1.0, 4.0) // Moved back slightly
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
         renderer.setSize(canvas.clientWidth, canvas.clientHeight)
         renderer.setPixelRatio(window.devicePixelRatio)
         rendererRef.current = renderer
 
-        // MUCH brighter lighting
-        scene.add(new THREE.AmbientLight(0xffffff, 1.2)) // Increased from 0.4
+        scene.add(new THREE.AmbientLight(0xffffff, 1.0))
 
-        const frontLight = new THREE.PointLight(0xffffff, 1.5) // Increased from 0.8
+        const frontLight = new THREE.PointLight(0xffffff, 1.5)
         frontLight.position.set(0, 2, 4)
         scene.add(frontLight)
-
-        const backLight = new THREE.PointLight(0xffffff, 1.0) // Added back light
-        backLight.position.set(0, 1, -3)
-        scene.add(backLight)
-
-        const rimLight = new THREE.DirectionalLight(0x6699ff, 0.8) // Increased from 0.5
-        rimLight.position.set(-2, 2, -2)
-        scene.add(rimLight)
-
-        const topLight = new THREE.DirectionalLight(0xffffff, 0.6) // New top light
-        topLight.position.set(0, 5, 0)
-        scene.add(topLight)
 
         const controls = new OrbitControls(camera, canvas)
         controls.enableDamping = true
         controls.dampingFactor = 0.05
-        controls.minDistance = 1.5
-        controls.maxDistance = 10
-        controls.target.set(0, 1, 0)
+        controls.minDistance = 1.0
+        controls.maxDistance = 15
+        controls.target.set(0, 0.8, 0) // Look at the torso area
 
         const bodyGroup = bodyGroupRef.current
-        bodyGroup.scale.set(50, 50, 50) // Scale UP by 50x to make models visible!
+        bodyGroup.scale.set(12, 12, 12) // REDUCED scale from 50 to 12 to fix zoom!
+
         scene.add(bodyGroup)
 
         const loader = new GLTFLoader()
