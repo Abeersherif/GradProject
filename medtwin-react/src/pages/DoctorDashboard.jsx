@@ -180,12 +180,14 @@ const DoctorDashboard = () => {
                 <div className="sidebar-footer">
                     <div className="user-profile-mini">
                         <div className="user-avatar" style={{ background: 'var(--gradient-blue)' }}>
-                            {user && user.fullName ?
-                                user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-                                : 'DR'}
+                            {user ? (
+                                (user.fullName || user.full_name || user.name || 'DR')
+                                    .trim().split(/\s+/)
+                                    .map(n => n[0]).join('').substring(0, 2).toUpperCase()
+                            ) : 'DR'}
                         </div>
                         <div className="user-info-mini">
-                            <h4>{user && user.fullName ? `Dr. ${user.fullName.split(' ').pop()}` : 'Dr. User'}</h4>
+                            <h4>{user ? `Dr. ${(user.fullName || user.full_name || user.name || 'User').split(' ').pop()}` : 'Dr. User'}</h4>
                             <p>{user?.email || 'Cardiology Dept.'}</p>
                         </div>
                     </div>

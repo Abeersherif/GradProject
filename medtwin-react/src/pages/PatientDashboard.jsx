@@ -93,17 +93,13 @@ const PatientDashboard = () => {
     // Safe initials calculation
     const userInitials = (() => {
         if (!userData) return 'MT'
-        if (userData.firstName && userData.lastName) {
-            return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase()
-        }
-        if (userData.fullName) {
-            const parts = userData.fullName.split(' ')
-            if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
-            return parts[0][0].toUpperCase()
-        }
-        if (userData.full_name) {
-            const parts = userData.full_name.split(' ')
-            if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+        const rawName = userData.firstName && userData.lastName
+            ? `${userData.firstName} ${userData.lastName}`
+            : (userData.fullName || userData.full_name || userData.name);
+
+        if (rawName) {
+            const parts = rawName.trim().split(/\s+/)
+            if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
             return parts[0][0].toUpperCase()
         }
         return 'MT'
@@ -112,7 +108,7 @@ const PatientDashboard = () => {
     // Safe full name calculation
     const fullName = userData?.firstName && userData?.lastName
         ? `${userData.firstName} ${userData.lastName}`
-        : (userData?.fullName || userData?.full_name || 'Guest User')
+        : (userData?.fullName || userData?.full_name || userData?.name || 'Guest User')
 
     return (
         <div className="dashboard-container">
