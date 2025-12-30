@@ -184,18 +184,25 @@ const DigitalTwinPage = () => {
 
                 // Assign realistic colors to organs
                 let organColor = 0xcc8899 // Default pinkish
+                let materialProps = { shininess: 80, specular: 0x222222 }
+
                 if (org.name === 'heart') organColor = 0xcc4444
                 if (org.name === 'pancreas') organColor = 0xddaa66
                 if (org.name.includes('kidney')) organColor = 0x884444
-                if (org.name.includes('eye')) organColor = 0xeeeeff
                 if (org.name === 'vasculature') organColor = 0xff6666
+
+                // Make eyes look natural and less scary
+                if (org.name.includes('eye')) {
+                    organColor = 0x8b7355 // Natural brown eye color
+                    materialProps = { shininess: 30, specular: 0x111111 } // Less shiny
+                    model.scale.set(0.7, 0.7, 0.7) // Make them smaller
+                }
 
                 model.traverse(child => {
                     if (child.isMesh) {
                         child.material = new THREE.MeshPhongMaterial({
                             color: organColor,
-                            shininess: 80,
-                            specular: 0x222222
+                            ...materialProps
                         })
                         child.name = org.name // Preserve name for traversal
                     }
