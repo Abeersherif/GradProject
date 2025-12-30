@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Base API URL
-const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin.onrender.com';
+const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin-backend.onrender.com';
 const API_BASE_URL = VITE_API_URL.endsWith('/api') ? VITE_API_URL : `${VITE_API_URL}/api`;
 
 // Create axios instance with default config
