@@ -14,6 +14,7 @@ const DigitalTwinPage = () => {
     const sceneRef = useRef(null)
     const bodyGroupRef = useRef(new THREE.Group())
     const heartModelRef = useRef(null)
+    const sceneInitialized = useRef(false) // Track if scene has been initialized
 
     useEffect(() => {
         const savedUserStr = localStorage.getItem('patientUser') || localStorage.getItem('user')
@@ -94,7 +95,12 @@ const DigitalTwinPage = () => {
     }
 
     useEffect(() => {
-        if (!canvasRef.current) return
+        // Don't initialize until userData is loaded
+        if (!userData || !canvasRef.current) return
+
+        // Prevent duplicate initialization
+        if (sceneInitialized.current) return
+        sceneInitialized.current = true
 
         const canvas = canvasRef.current
         const scene = new THREE.Scene()
@@ -232,7 +238,7 @@ const DigitalTwinPage = () => {
             controls.dispose()
             renderer.dispose()
         }
-    }, []) // Only run once on mount
+    }, [userData]) // Wait for userData to be available
 
     return (
         <div className="twin-page-v2">
