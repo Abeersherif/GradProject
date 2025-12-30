@@ -16,11 +16,11 @@ app = Flask(__name__)
 FRONTEND_URL = os.environ.get('FRONTEND_URL', '*')
 
 # CORS configuration - Allow frontend to access backend
-# Using a more permissive setup for debugging the "Network Error"
 CORS(app, resources={
     r"/*": {
         "origins": [
             FRONTEND_URL,
+            "https://medtwinweb.onrender.com",
             "https://medtwin-frontend.onrender.com",
             "https://grad-project-pied.vercel.app",
             "http://localhost:5173",
