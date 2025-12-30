@@ -102,15 +102,14 @@ const DigitalTwinPage = () => {
         scene.background = new THREE.Color(0x0a0a14)
 
         const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
-        // Move camera MUCH further back to fix zoom
-        camera.position.set(0, 1.0, 6.5)
+        camera.position.set(0, 0, 10.5) // Move MUCH further back
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
         renderer.setSize(canvas.clientWidth, canvas.clientHeight)
         renderer.setPixelRatio(window.devicePixelRatio)
         rendererRef.current = renderer
 
-        scene.add(new THREE.AmbientLight(0xffffff, 1.2))
+        scene.add(new THREE.AmbientLight(0xffffff, 1.0))
 
         const frontLight = new THREE.PointLight(0xffffff, 1.5)
         frontLight.position.set(0, 2, 4)
@@ -119,14 +118,12 @@ const DigitalTwinPage = () => {
         const controls = new OrbitControls(camera, canvas)
         controls.enableDamping = true
         controls.dampingFactor = 0.05
-        controls.minDistance = 0.5
-        controls.maxDistance = 20
-        controls.target.set(0, 0.5, 0) // Center on the torso
+        controls.minDistance = 1.0
+        controls.maxDistance = 50
+        controls.target.set(0, 0, 0)
 
         const bodyGroup = bodyGroupRef.current
-        // Set a much smaller scale. If models are real-world size (1.8m), 
-        // a scale of 1.0 or 1.5 is perfect for a camera at z=6.5
-        bodyGroup.scale.set(1.5, 1.5, 1.5)
+        bodyGroup.scale.set(0.8, 0.8, 0.8) // Balanced scale
 
 
 
@@ -145,7 +142,7 @@ const DigitalTwinPage = () => {
                     child.material = new THREE.MeshPhongMaterial({
                         color: 0x4a5a7a,
                         transparent: true,
-                        opacity: 0.35,
+                        opacity: 0.08, // Very faint body shell
                         side: THREE.DoubleSide
                     })
                 }
