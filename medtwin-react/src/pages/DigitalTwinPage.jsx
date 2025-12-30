@@ -31,13 +31,15 @@ const DigitalTwinPage = () => {
     }, [])
 
     const runSimulation = async (patientId, yearsAhead = 0) => {
+        const id = patientId || 1; // Default to 1 for mock demo
         setLoading(true)
+        console.log(`Running simulation for ID: ${id}, years ahead: ${yearsAhead}`);
         try {
             const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin-backend.onrender.com';
             const BASE = VITE_API_URL.endsWith('/api') ? VITE_API_URL : `${VITE_API_URL}/api`;
             const token = localStorage.getItem('patientToken') || localStorage.getItem('authToken');
 
-            const response = await fetch(`${BASE}/twin/${patientId}/visualization-data?years_ahead=${yearsAhead}`, {
+            const response = await fetch(`${BASE}/twin/${id}/visualization-data?years_ahead=${yearsAhead}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -45,9 +47,13 @@ const DigitalTwinPage = () => {
                 }
             })
 
-            if (!response.ok) throw new Error('Simulation failed')
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Simulation failed');
+            }
 
             const data = await response.json()
+            console.log('Simulation data received:', data);
             setSimulationData(data)
             updateModelColors(data.organs)
         } catch (error) {
@@ -59,25 +65,27 @@ const DigitalTwinPage = () => {
 
     const updateModelColors = (organs) => {
         if (!bodyGroupRef.current || !organs) return
+        console.log('Updating model colors with:', organs);
 
         bodyGroupRef.current.traverse((child) => {
-            if (child.isMesh && (child.name || child.parent?.name)) {
-                // Check both child name and parent name (common in GLTF)
+            if (child.isMesh) {
+                // Use substring matching and case-insensitive check
                 const name = (child.name || child.parent?.name || '').toLowerCase()
                 let color = null
 
                 if (name.includes('heart')) color = organs.heart?.color
-                if (name.includes('pancreas')) color = organs.pancreas?.color
-                if (name.includes('kidney')) color = organs.kidneys?.color
-                if (name.includes('vessel') || name.includes('blood')) color = organs.vessels?.color
-                if (name.includes('eye')) color = organs.eyes?.color
+                else if (name.includes('pancreas')) color = organs.pancreas?.color
+                else if (name.includes('kidney')) color = organs.kidneys?.color
+                else if (name.includes('vessel') || name.includes('blood') || name.includes('vasculature')) color = organs.vessels?.color
+                else if (name.includes('eye')) color = organs.eyes?.color
 
                 if (color) {
                     const mappedColor = color === 'red' ? 0xff4d4d : color === 'yellow' ? 0xffcc00 : 0x00ff88
+                    console.log(`Setting ${name} to ${color} (${mappedColor})`);
                     child.material.color.setHex(mappedColor)
                     if (child.material.emissive) {
                         child.material.emissive.setHex(mappedColor)
-                        child.material.emissiveIntensity = 0.3
+                        child.material.emissiveIntensity = 0.4
                     }
                 }
             }
@@ -87,9 +95,8 @@ const DigitalTwinPage = () => {
     const handleYearChange = (e) => {
         const year = parseInt(e.target.value)
         setTimelineYear(year)
-        if (userData?.id) {
-            runSimulation(userData.id, year - 2025)
-        }
+        // Always try to run simulation, use default ID if needed
+        runSimulation(userData?.id || 1, year - 2025)
     }
 
     useEffect(() => {
@@ -101,7 +108,7 @@ const DigitalTwinPage = () => {
         scene.background = new THREE.Color(0x0a0a14)
 
         const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
-        camera.position.set(0, 1.0, 4.0) // Moved back slightly
+        camera.position.set(0, 1.2, 4.2) // Adjusted for better view
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
         renderer.setSize(canvas.clientWidth, canvas.clientHeight)
@@ -119,10 +126,11 @@ const DigitalTwinPage = () => {
         controls.dampingFactor = 0.05
         controls.minDistance = 1.0
         controls.maxDistance = 15
-        controls.target.set(0, 0.8, 0) // Look at the torso area
+        controls.target.set(0, 1.0, 0) // Center on the model better
 
         const bodyGroup = bodyGroupRef.current
-        bodyGroup.scale.set(12, 12, 12) // REDUCED scale from 50 to 12 to fix zoom!
+        bodyGroup.scale.set(18, 18, 18) // INCREASED scale from 12 to 18 for better visibility
+
 
         scene.add(bodyGroup)
 

@@ -99,25 +99,43 @@ def get_visualization_data(patient_id):
     try:
         years_ahead = int(request.args.get('years_ahead', 0))
         
-        # Create a sample patient twin
+        # Create a mock patient dictionary for the simulation engine
+        # In production, this would come from a database query using patient_id
+        mock_patient_data = {
+            "Age": 58,
+            "Sex": "Female",
+            "Ethnicity": "Middle Eastern",
+            "BMI": 35.8,
+            "Waist_Circumference": 105.0,
+            "HbA1c": 10.9,
+            "Fasting_Blood_Glucose": 180.0,
+            "Blood_Pressure_Systolic": 145,
+            "Blood_Pressure_Diastolic": 92,
+            "Cholesterol_Total": 220.0,
+            "Cholesterol_HDL": 40.0,
+            "Cholesterol_LDL": 160.0,
+            "GGT": 45.0,
+            "Serum_Urate": 6.8,
+            "Physical_Activity_Level": "Low",
+            "Dietary_Intake_Calories": 2400,
+            "Alcohol_Consumption": "None",
+            "Smoking_Status": "Never",
+            "Family_History_of_Diabetes": 1,
+            "Previous_Gestational_Diabetes": 0
+        }
+        
+        # Correctly initialize the twin using a dictionary as required by the class
         twin = DiabetesTwin(
-            patient_id=patient_id,
-            age=58,
-            gender='female',
-            hba1c=10.9,
-            fasting_glucose=180,
-            bmi=35.8,
-            diabetes_duration=8,
-            medications=['metformin'],
-            complications=[]
+            patient_id=f"DM_{patient_id:05d}",
+            patient_data=mock_patient_data
         )
         
-        # Calculate current risks
+        # Calculate risks using the prediction engine
         assessor = RiskAssessor()
         risks = assessor.predict_complication_risk(twin, years_ahead=max(1, years_ahead))
         organ_function = assessor.predict_organ_function(twin, years_ahead=max(1, years_ahead))
         
-        # Map risks to colors and levels for frontend
+        # Map percentages and risk levels to colors for the 3D frontend
         def get_risk_level(risk_pct):
             if risk_pct < 20:
                 return {"risk_level": "low", "color": "green", "percentage": risk_pct}
@@ -126,6 +144,7 @@ def get_visualization_data(patient_id):
             else:
                 return {"risk_level": "high", "color": "red", "percentage": risk_pct}
         
+        # Consolidate results for original organs
         response_data = {
             "patient_id": patient_id,
             "years_ahead": years_ahead,
@@ -133,23 +152,23 @@ def get_visualization_data(patient_id):
             "organs": {
                 "heart": {
                     **get_risk_level(risks.get('cvd_risk', 30)),
-                    "function": organ_function.get('heart', 0.8)
+                    "function": round(organ_function.get('heart', 0.8), 2)
                 },
                 "kidneys": {
                     **get_risk_level(risks.get('nephropathy_risk', 40)),
-                    "function": organ_function.get('kidneys', 0.7)
+                    "function": round(organ_function.get('kidneys', 0.7), 2)
                 },
                 "eyes": {
                     **get_risk_level(risks.get('retinopathy_risk', 50)),
-                    "function": organ_function.get('eyes', 0.75)
+                    "function": round(organ_function.get('eyes', 0.75), 2)
                 },
                 "pancreas": {
-                    **get_risk_level(35),  # Based on HbA1c
-                    "function": organ_function.get('pancreas', 0.6)
+                    **get_risk_level(35 + (years_ahead * 2)),  # Pancreas degrades over time
+                    "function": round(organ_function.get('pancreas', 0.6), 2)
                 },
                 "vessels": {
                     **get_risk_level(risks.get('cvd_risk', 30)),
-                    "function": organ_function.get('blood_vessels', 0.75)
+                    "function": round(organ_function.get('blood_vessels', 0.75), 2)
                 }
             },
             "overall_health_score": round(sum(organ_function.values()) / len(organ_function) * 100, 1)
@@ -159,7 +178,10 @@ def get_visualization_data(patient_id):
         
     except Exception as e:
         logger.error(f"Error in visualization endpoint: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
