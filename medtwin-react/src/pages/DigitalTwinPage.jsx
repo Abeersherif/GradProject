@@ -31,9 +31,8 @@ const DigitalTwinPage = () => {
     }, [])
 
     const runSimulation = async (patientId, yearsAhead = 0) => {
-        const id = patientId || 1; // Default to 1 for mock demo
+        const id = patientId || 1;
         setLoading(true)
-        console.log(`Running simulation for ID: ${id}, years ahead: ${yearsAhead}`);
         try {
             const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://medtwin-backend.onrender.com';
             const BASE = VITE_API_URL.endsWith('/api') ? VITE_API_URL : `${VITE_API_URL}/api`;
@@ -53,7 +52,6 @@ const DigitalTwinPage = () => {
             }
 
             const data = await response.json()
-            console.log('Simulation data received:', data);
             setSimulationData(data)
             updateModelColors(data.organs)
         } catch (error) {
@@ -65,11 +63,9 @@ const DigitalTwinPage = () => {
 
     const updateModelColors = (organs) => {
         if (!bodyGroupRef.current || !organs) return
-        console.log('Updating model colors with:', organs);
 
         bodyGroupRef.current.traverse((child) => {
             if (child.isMesh) {
-                // Use substring matching and case-insensitive check
                 const name = (child.name || child.parent?.name || '').toLowerCase()
                 let color = null
 
@@ -81,11 +77,10 @@ const DigitalTwinPage = () => {
 
                 if (color) {
                     const mappedColor = color === 'red' ? 0xff4d4d : color === 'yellow' ? 0xffcc00 : 0x00ff88
-                    console.log(`Setting ${name} to ${color} (${mappedColor})`);
                     child.material.color.setHex(mappedColor)
                     if (child.material.emissive) {
                         child.material.emissive.setHex(mappedColor)
-                        child.material.emissiveIntensity = 0.4
+                        child.material.emissiveIntensity = 0.5
                     }
                 }
             }
@@ -95,7 +90,6 @@ const DigitalTwinPage = () => {
     const handleYearChange = (e) => {
         const year = parseInt(e.target.value)
         setTimelineYear(year)
-        // Always try to run simulation, use default ID if needed
         runSimulation(userData?.id || 1, year - 2025)
     }
 
@@ -108,14 +102,15 @@ const DigitalTwinPage = () => {
         scene.background = new THREE.Color(0x0a0a14)
 
         const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
-        camera.position.set(0, 1.2, 4.2) // Adjusted for better view
+        // Move camera MUCH further back to fix zoom
+        camera.position.set(0, 1.0, 6.5)
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
         renderer.setSize(canvas.clientWidth, canvas.clientHeight)
         renderer.setPixelRatio(window.devicePixelRatio)
         rendererRef.current = renderer
 
-        scene.add(new THREE.AmbientLight(0xffffff, 1.0))
+        scene.add(new THREE.AmbientLight(0xffffff, 1.2))
 
         const frontLight = new THREE.PointLight(0xffffff, 1.5)
         frontLight.position.set(0, 2, 4)
@@ -124,12 +119,15 @@ const DigitalTwinPage = () => {
         const controls = new OrbitControls(camera, canvas)
         controls.enableDamping = true
         controls.dampingFactor = 0.05
-        controls.minDistance = 1.0
-        controls.maxDistance = 15
-        controls.target.set(0, 1.0, 0) // Center on the model better
+        controls.minDistance = 0.5
+        controls.maxDistance = 20
+        controls.target.set(0, 0.5, 0) // Center on the torso
 
         const bodyGroup = bodyGroupRef.current
-        bodyGroup.scale.set(18, 18, 18) // INCREASED scale from 12 to 18 for better visibility
+        // Set a much smaller scale. If models are real-world size (1.8m), 
+        // a scale of 1.0 or 1.5 is perfect for a camera at z=6.5
+        bodyGroup.scale.set(1.5, 1.5, 1.5)
+
 
 
         scene.add(bodyGroup)
