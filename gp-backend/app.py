@@ -57,6 +57,7 @@ def login():
             "id": 1,
             "email": email,
             "name": "Abeer Sherif",
+            "sex": "Female",  # Added for Digital Twin body model selection
             "role": "patient"
         }
     }), 200
@@ -70,6 +71,7 @@ def register_patient():
             "id": 1,
             "email": data.get('email'),
             "name": data.get('name', 'New Patient'),
+            "sex": data.get('sex', 'Female'),  # Get from signup form
             "role": "patient"
         }
     }), 201
