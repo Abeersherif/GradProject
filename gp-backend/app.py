@@ -1,27 +1,97 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 from digital_twin import DiabetesTwin
 from simulation_engine import GlucoseSimulator, RiskAssessor
 import os
+import json
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
 # Get frontend URL from environment variable for production
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', '*')
 
 # CORS configuration - Allow frontend to access backend
+# Using a more permissive setup for debugging the "Network Error"
 CORS(app, resources={
-    r"/api/*": {
+    r"/*": {
         "origins": [
             FRONTEND_URL,
-            "https://medtwinweb.onrender.com",
+            "https://medtwin-frontend.onrender.com",
+            "https://grad-project-pied.vercel.app",
             "http://localhost:5173",
             "http://localhost:3000"
         ],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
+        "supports_credentials": True
     }
 })
+
+@app.before_request
+def log_request_info():
+    logger.info(f"Request: {request.method} {request.url}")
+
+# --- MOCK AUTH ROUTES FOR FRONTEND ---
+
+@app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
+def login():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+    
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+    
+    logger.info(f"Login attempt for: {email}")
+    
+    # Mock authentication for now to fix "Network Error"
+    # In production, this would check a database
+    return jsonify({
+        "access_token": "mock-token-123",
+        "user": {
+            "id": 1,
+            "email": email,
+            "name": "Abeer Sherif",
+            "role": "patient"
+        }
+    }), 200
+
+@app.route('/api/auth/register/patient', methods=['POST'])
+def register_patient():
+    data = request.json
+    return jsonify({
+        "access_token": "mock-token-reg",
+        "user": {
+            "id": 1,
+            "email": data.get('email'),
+            "name": data.get('name', 'New Patient'),
+            "role": "patient"
+        }
+    }), 201
+
+# --- DASHBOARD ROUTES ---
+
+@app.route('/api/patient/dashboard', methods=['GET'])
+def patient_dashboard():
+    return jsonify({
+        "summary": {
+            "condition": "Diabetes Type 2",
+            "severity": "MODERATE",
+            "next_appointment": "2024-01-15",
+            "adherence_rate": "85%"
+        },
+        "recent_vitals": [
+            {"date": "2023-12-25", "glucose": 140, "bp": "120/80"},
+            {"date": "2023-12-28", "glucose": 135, "bp": "122/82"}
+        ]
+    }), 200
+
+# --- EXISTING DIGITAL TWIN ROUTES ---
 
 @app.route('/api/twin/<int:patient_id>/visualization-data', methods=['GET'])
 def get_visualization_data(patient_id):
@@ -29,7 +99,7 @@ def get_visualization_data(patient_id):
     try:
         years_ahead = int(request.args.get('years_ahead', 0))
         
-        # Create a sample patient twin (in production, load from database)
+        # Create a sample patient twin
         twin = DiabetesTwin(
             patient_id=patient_id,
             age=58,
@@ -88,16 +158,15 @@ def get_visualization_data(patient_id):
         return jsonify(response_data), 200
         
     except Exception as e:
-        print(f"Error in visualization endpoint: {e}")
+        logger.error(f"Error in visualization endpoint: {e}")
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return jsonify({"status": "healthy", "service": "MedTwin Digital Twin API"}), 200
 
-
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
