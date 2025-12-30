@@ -70,6 +70,12 @@ if os.path.exists("assets"):
 else:
     print("⚠️  'assets' directory not found. 3D models may fail to load.")
 
+# MOUNT MODELS directory (Critical for 3D visualization)
+if os.path.exists("models"):
+    app.mount("/models", StaticFiles(directory="models"), name="models")
+else:
+    print("⚠️  'models' directory not found. 3D models will fail to load.")
+
 # Database is now used instead of CSV
 # df = pd.read_csv('diabetes_dataset.csv')
 # twin_cache = {}

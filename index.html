@@ -400,7 +400,8 @@
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
     <script>
-        const API = 'http://localhost:8000';
+        // Use current origin for API calls (works in dev and prod)
+        const API = window.location.origin;
 
         // Organ models and meshes
         const organMeshes = {};

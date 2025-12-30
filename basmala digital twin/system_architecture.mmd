@@ -1,0 +1,32 @@
+graph TD
+    %% Styling
+    classDef layer fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef component fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,rx:5,ry:5;
+    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,rx:5,ry:5;
+
+    subgraph UI_Layer [User Interface Layer]
+        direction LR
+        MobileApp[📱 Patient Mobile App]:::component
+        Dashboard[💻 Doctor Dashboard]:::component
+    end
+
+    subgraph Core_Layer [Intelligent Core]
+        direction LR
+        Agents[🤖 Multi-Agent Orchestrator\n(8 Agents)]:::component
+        DigitalTwin[🧬 Digital Twin Engine\n(Simulation + State)]:::component
+    end
+
+    subgraph Data_Layer [Data Layer]
+        direction LR
+        DB[(☁️ Real-time Database)]:::db
+        KG[(📚 Medical Knowledge Graph)]:::db
+    end
+
+    %% Key Interactions
+    MobileApp <--> Agents
+    Dashboard <--> Agents
+    Agents <--> DigitalTwin
+    DigitalTwin <--> DB
+    Agents <--> KG
+    
+    class UI_Layer,Core_Layer,Data_Layer layer

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MedTwin</title>
+    <meta name="description" content="Access your MedTwin account - Your intelligent health companion awaits.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Back to Home -->
+    <a href="index.html" class="back-home">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M15 10L5 10M5 10L9 6M5 10L9 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+        </svg>
+        Back to Home
+    </a>
+
+    <!-- Login Container -->
+    <div class="auth-container">
+        <!-- Left Side - Visual -->
+        <div class="auth-visual">
+            <div class="auth-visual-content">
+                <div class="logo-large">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                        <path d="M40 5L40 75M5 40L75 40" stroke="url(#logo-gradient-large)" stroke-width="4"
+                            stroke-linecap="round" />
+                        <circle cx="40" cy="40" r="15" stroke="url(#logo-gradient-large)" stroke-width="3"
+                            fill="none" />
+                        <defs>
+                            <linearGradient id="logo-gradient-large" x1="0" y1="0" x2="80" y2="80">
+                                <stop offset="0%" stop-color="#D4AF37" />
+                                <stop offset="100%" stop-color="#E8B4B8" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h1 class="auth-visual-title">Welcome Back to<br><span class="gradient-text">MedTwin</span></h1>
+                <p class="auth-visual-description">
+                    Your digital health companion is ready to continue your wellness journey.
+                </p>
+                <div class="auth-visual-stats">
+                    <div class="visual-stat">
+                        <div class="visual-stat-icon">🔒</div>
+                        <div class="visual-stat-text">Secure & Private</div>
+                    </div>
+                    <div class="visual-stat">
+                        <div class="visual-stat-icon">⚡</div>
+                        <div class="visual-stat-text">Instant Access</div>
+                    </div>
+                    <div class="visual-stat">
+                        <div class="visual-stat-icon">🌟</div>
+                        <div class="visual-stat-text">Premium Care</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="auth-form-container">
+            <div class="auth-form-wrapper">
+                <div class="auth-header">
+                    <h2 class="auth-title">Sign In</h2>
+                    <p class="auth-subtitle">Enter your credentials to access your account</p>
+                </div>
+
+                <form class="auth-form" id="loginForm">
+                    <!-- Email Input -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M3 4L10 11L17 4M3 4L3 16L17 16L17 4L3 4Z" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <rect x="4" y="9" width="12" height="8" rx="1" stroke="currentColor"
+                                    stroke-width="1.5" />
+                                <path d="M7 9V6C7 4.34315 8.34315 3 10 3C11.6569 3 13 4.34315 13 6V9"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            </svg>
+                            <input type="password" id="password" name="password" class="form-input"
+                                placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" id="togglePassword">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path
+                                        d="M10 7C8.34315 7 7 8.34315 7 10C7 11.6569 8.34315 13 10 13C11.6569 13 13 11.6569 13 10C13 8.34315 11.6569 7 10 7Z"
+                                        stroke="currentColor" stroke-width="1.5" />
+                                    <path d="M2 10C2 10 5 4 10 4C15 4 18 10 18 10C18 10 15 16 10 16C5 16 2 10 2 10Z"
+                                        stroke="currentColor" stroke-width="1.5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember" class="checkbox-input">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-submit">
+                        Sign In
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="divider">
+                        <span>or continue with</span>
+                    </div>
+
+                    <!-- Social Login -->
+                    <div class="social-login">
+                        <button type="button" class="social-btn">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path
+                                    d="M18 10.2C18 9.5 17.9 9 17.8 8.5H10V11.7H14.5C14.3 12.8 13.6 13.7 12.6 14.3V16.3H15.4C17 14.9 18 12.8 18 10.2Z"
+                                    fill="#4285F4" />
+                                <path
+                                    d="M10 18C12.4 18 14.4 17.2 15.4 16.3L12.6 14.3C11.8 14.8 10.8 15.1 10 15.1C7.7 15.1 5.8 13.7 5.1 11.8H2.2V13.9C3.2 15.9 6.4 18 10 18Z"
+                                    fill="#34A853" />
+                                <path
+                                    d="M5.1 11.8C4.9 11.3 4.8 10.7 4.8 10C4.8 9.3 4.9 8.7 5.1 8.2V6.1H2.2C1.4 7.7 1 9.3 1 10C1 10.7 1.4 12.3 2.2 13.9L5.1 11.8Z"
+                                    fill="#FBBC05" />
+                                <path
+                                    d="M10 4.9C11 4.9 11.9 5.3 12.6 5.9L15.1 3.4C13.4 1.8 11.3 1 10 1C6.4 1 3.2 3.1 2.2 5.1L5.1 7.2C5.8 5.3 7.7 4.9 10 4.9Z"
+                                    fill="#EA4335" />
+                            </svg>
+                            Google
+                        </button>
+                        <button type="button" class="social-btn">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path
+                                    d="M18.5 10C18.5 5.3 14.7 1.5 10 1.5C5.3 1.5 1.5 5.3 1.5 10C1.5 14.2 4.6 17.7 8.6 18.4V12.5H6.5V10H8.6V8.1C8.6 6 9.9 4.8 11.8 4.8C12.7 4.8 13.6 5 13.6 5V7H12.6C11.6 7 11.3 7.6 11.3 8.3V10H13.5L13.1 12.5H11.3V18.4C15.4 17.7 18.5 14.2 18.5 10Z"
+                                    fill="#1877F2" />
+                            </svg>
+                            Facebook
+                        </button>
+                    </div>
+
+                    <!-- Sign Up Link -->
+                    <div class="auth-footer">
+                        <p>Don't have an account? <a href="signup.html" class="auth-link">Sign up</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+</body>
+
+</html>

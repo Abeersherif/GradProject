@@ -2,9 +2,9 @@ import docx
 import os
 
 # Paths
-source_file = "NTRA-GP_Competition_template-2025_Ongoing-Academic-year-2025-2026 - Copy.docx"
+source_file = "NTRA-GP_Competition_template-2025_Ongoing-Academic-year-2025-2026 - UPDATED MEDTWIN.docx"
 from docx.shared import Inches
-output_file = "NTRA-GP_Competition_MedTwin_Filled_v8.docx"
+output_file = "NTRA-GP_Competition_MedTwin_Filled_v9.docx"
 
 # Project Data (Extracted from pdf_content.txt)
 project_data = {

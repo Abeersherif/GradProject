@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedTwin - Your Intelligent Health Companion</title>
+    <meta name="description" content="Experience the future of healthcare with MedTwin's AI-powered digital twin technology. Luxury meets medical excellence.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L16 30M2 16L30 16" stroke="url(#logo-gradient)" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="16" cy="16" r="6" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32">
+                                <stop offset="0%" stop-color="#D4AF37"/>
+                                <stop offset="100%" stop-color="#E8B4B8"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">MedTwin</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="login.html" class="btn-secondary">Login</a></li>
+                <li><a href="signup.html" class="btn-primary">Get Started</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    AI-Powered Healthcare
+                </div>
+                <h1 class="hero-title">
+                    Your Health,<br>
+                    <span class="gradient-text">Intelligently</span><br>
+                    Monitored
+                </h1>
+                <p class="hero-description">
+                    Experience the future of personalized healthcare with MedTwin's revolutionary digital twin technology. 
+                    Nine specialized AI agents working in harmony to keep you healthy, safe, and informed.
+                </p>
+                <div class="hero-buttons">
+                    <a href="signup.html" class="btn-primary btn-large">
+                        Start Your Journey
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="#how-it-works" class="btn-outline btn-large">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+                            <path d="M10 6L10 10L13 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Watch Demo
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">9</div>
+                        <div class="stat-label">AI Agents</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Monitoring</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-card card-1">
+                    <div class="card-icon">💓</div>
+                    <div class="card-content">
+                        <div class="card-title">Heart Rate</div>
+                        <div class="card-value">72 BPM</div>
+                    </div>
+                    <div class="card-status status-good"></div>
+                </div>
+                <div class="floating-card card-2">
+                    <div class="card-icon">🧬</div>
+                    <div class="card-content">
+                        <div class="card-title">AI Analysis</div>
+                        <div class="card-value">Complete</div>
+                    </div>
+                    <div class="card-status status-good"></div>
+                </div>
+                <div class="floating-card card-3">
+                    <div class="card-icon">💊</div>
+                    <div class="card-content">
+                        <div class="card-title">Medication</div>
+                        <div class="card-value">On Track</div>
+                    </div>
+                    <div class="card-status status-good"></div>
+                </div>
+                <div class="hero-circle">
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring pulse-ring-2"></div>
+                    <svg class="hero-icon" width="120" height="120" viewBox="0 0 120 120" fill="none">
+                        <circle cx="60" cy="60" r="50" stroke="url(#hero-gradient)" stroke-width="2" opacity="0.3"/>
+                        <path d="M60 20C37.9 20 20 37.9 20 60C20 82.1 37.9 100 60 100C82.1 100 100 82.1 100 60" 
+                              stroke="url(#hero-gradient)" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="60" cy="60" r="30" fill="url(#hero-gradient)" opacity="0.2"/>
+                        <text x="60" y="70" text-anchor="middle" fill="#F5F1E8" font-size="40" font-family="Outfit">+</text>
+                        <defs>
+                            <linearGradient id="hero-gradient" x1="0" y1="0" x2="120" y2="120">
+                                <stop offset="0%" stop-color="#D4AF37"/>
+                                <stop offset="50%" stop-color="#6B46C1"/>
+                                <stop offset="100%" stop-color="#E8B4B8"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Nine AI Agents,<br><span class="gradient-text">One Mission</span></h2>
+                <p class="section-description">
+                    Our specialized AI agents work collaboratively to provide comprehensive, personalized healthcare monitoring and support.
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <!-- Feature Card 1 -->
+                <div class="feature-card">
+                    <div class="feature-icon icon-diagnostic">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <path d="M20 5L20 35M5 20L35 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="20" cy="20" r="8" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Diagnostic Agent</h3>
+                    <p class="feature-description">
+                        Intelligent symptom analysis through natural conversation, identifying conditions with medical precision.
+                    </p>
+                    <div class="feature-tag">Symptom Q&A</div>
+                </div>
+
+                <!-- Feature Card 2 -->
+                <div class="feature-card">
+                    <div class="feature-icon icon-analysis">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <path d="M5 30L15 20L20 25L35 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="15" cy="20" r="3" fill="currentColor"/>
+                            <circle cx="20" cy="25" r="3" fill="currentColor"/>
+                            <circle cx="35" cy="10" r="3" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Analysis & Simulation</h3>
+                    <p class="feature-description">
+                        Evaluates your health data against clinical standards, simulating potential outcomes.
+                    </p>
+                    <div class="feature-tag">Severity Assessment</div>
+                </div>
+
+                <!-- Feature Card 3 -->
+                <div class="feature-card">
+                    <div class="feature-icon icon-planner">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <rect x="8" y="8" width="24" height="24" rx="2" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M8 15L32 15M20 8L20 32" stroke="currentColor" stroke-width="2.5"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Planner Agent</h3>
+                    <p class="feature-description">
+                        Creates personalized care plans with short-term actions and long-term management strategies.
+                    </p>
+                    <div class="feature-tag">Care Planning</div>
+                </div>
+
+                <!-- Feature Card 4 -->
+                <div class="feature-card">
+                    <div class="feature-icon icon-prediction">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <circle cx="20" cy="20" r="12" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M20 8L20 20L28 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Prediction Agent</h3>
+                    <p class="feature-description">
+                        Forecasts long-term health risks and disease progression to enable preventive care.
+                    </p>
+                    <div class="feature-tag">Risk Prediction</div>
+                </div>
+
+                <!-- Feature Card 5 -->
+                <div class="feature-card">
+                    <div class="feature-icon icon-triage">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <path d="M20 5L25 15L35 15L27 22L30 32L20 26L10 32L13 22L5 15L15 15L20 5Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Triage & Safety</h3>
+                    <p class="feature-description">
+                        Analyzes urgency scores and flags critical cases for immediate medical attention.
+                    </p>
+                    <div class="feature-tag">Priority Management</div>
+                </div>
+
+                <!-- Feature Card 6 -->
+                <div class="feature-card">
+                    <div class="feature-icon icon-treatment">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <rect x="12" y="8" width="16" height="24" rx="3" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M17 16L23 16M17 20L23 20M17 24L20 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Treatment & Notifier</h3>
+                    <p class="feature-description">
+                        Tracks medication adherence with smart reminders synced to your calendar.
+                    </p>
+                    <div class="feature-tag">Medication Tracking</div>
+                </div>
+
+                <!-- Feature Card 7 -->
+                <div class="feature-card">
+                    <div class="feature-icon icon-doctor">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <circle cx="20" cy="12" r="6" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M10 32C10 25 14 22 20 22C26 22 30 25 30 32" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Doctor Assistant</h3>
+                    <p class="feature-description">
+                        Provides physicians with executive summaries and diagnostic recommendations.
+                    </p>
+                    <div class="feature-tag">Clinical Support</div>
+                </div>
+
+                <!-- Feature Card 8 -->
+                <div class="feature-card">
+                    <div class="feature-icon icon-lab">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <path d="M15 5L15 18L8 32C7 34 8 36 10 36L30 36C32 36 33 34 32 32L25 18L25 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M15 5L25 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Lab Results Agent</h3>
+                    <p class="feature-description">
+                        Interprets complex lab reports in simple language while highlighting critical findings.
+                    </p>
+                    <div class="feature-tag">Results Interpretation</div>
+                </div>
+
+                <!-- Feature Card 9 -->
+                <div class="feature-card feature-card-highlight">
+                    <div class="feature-icon icon-coordinator">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <circle cx="20" cy="20" r="4" fill="currentColor"/>
+                            <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="30" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="10" cy="30" r="3" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="30" cy="30" r="3" stroke="currentColor" stroke-width="2"/>
+                            <path d="M20 20L10 10M20 20L30 10M20 20L10 30M20 20L30 30" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Coordinator Agent</h3>
+                    <p class="feature-description">
+                        The orchestrator that connects all agents, managing your complete health journey from symptom to treatment.
+                    </p>
+                    <div class="feature-tag">Central Intelligence</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Your Health Journey,<br><span class="gradient-text">Simplified</span></h2>
+                <p class="section-description">
+                    From your first symptom to ongoing care, MedTwin guides you every step of the way.
+                </p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-number">01</div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">Share Your Symptoms</h3>
+                        <p class="timeline-description">
+                            Have a natural conversation with our Diagnostic Agent. No medical jargon required—just describe how you feel.
+                        </p>
+                    </div>
+                    <div class="timeline-visual">
+                        <div class="timeline-icon">💬</div>
+                    </div>
+                </div>
+
+                <div class="timeline-connector"></div>
+
+                <div class="timeline-item">
+                    <div class="timeline-number">02</div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">AI Analysis & Prediction</h3>
+                        <p class="timeline-description">
+                            Multiple AI agents analyze your data, assess severity, and predict potential health trajectories.
+                        </p>
+                    </div>
+                    <div class="timeline-visual">
+                        <div class="timeline-icon">🧠</div>
+                    </div>
+                </div>
+
+                <div class="timeline-connector"></div>
+
+                <div class="timeline-item">
+                    <div class="timeline-number">03</div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">Personalized Care Plan</h3>
+                        <p class="timeline-description">
+                            Receive a tailored plan with immediate actions and long-term strategies, reviewed by medical professionals.
+                        </p>
+                    </div>
+                    <div class="timeline-visual">
+                        <div class="timeline-icon">📋</div>
+                    </div>
+                </div>
+
+                <div class="timeline-connector"></div>
+
+                <div class="timeline-item">
+                    <div class="timeline-number">04</div>
+                    <div class="timeline-content">
+                        <h3 class="timeline-title">Ongoing Monitoring</h3>
+                        <p class="timeline-description">
+                            24/7 health tracking, medication reminders, and continuous optimization of your care plan.
+                        </p>
+                    </div>
+                    <div class="timeline-visual">
+                        <div class="timeline-icon">📊</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-container">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Transform<br>Your Healthcare?</h2>
+                <p class="cta-description">
+                    Join thousands of patients and doctors experiencing the future of personalized medicine.
+                </p>
+                <div class="cta-buttons">
+                    <a href="signup.html" class="btn-primary btn-large">
+                        Get Started Free
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="btn-outline btn-large">Contact Sales</a>
+                </div>
+            </div>
+            <div class="cta-visual">
+                <div class="cta-card">
+                    <div class="cta-card-header">
+                        <span class="cta-card-title">Your Digital Twin</span>
+                        <span class="cta-card-status">Active</span>
+                    </div>
+                    <div class="cta-card-body">
+                        <div class="cta-metric">
+                            <span class="cta-metric-label">Health Score</span>
+                            <span class="cta-metric-value">94/100</span>
+                        </div>
+                        <div class="cta-progress">
+                            <div class="cta-progress-bar" style="width: 94%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M16 2L16 30M2 16L30 16" stroke="url(#footer-gradient)" stroke-width="3" stroke-linecap="round"/>
+                            <circle cx="16" cy="16" r="6" stroke="url(#footer-gradient)" stroke-width="2" fill="none"/>
+                            <defs>
+                                <linearGradient id="footer-gradient" x1="0" y1="0" x2="32" y2="32">
+                                    <stop offset="0%" stop-color="#D4AF37"/>
+                                    <stop offset="100%" stop-color="#E8B4B8"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <span class="logo-text">MedTwin</span>
+                </div>
+                <p class="footer-tagline">Where healthcare meets intelligence</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy</a></li>
+                        <li><a href="#">Terms</a></li>
+                        <li><a href="#">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 MedTwin. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
