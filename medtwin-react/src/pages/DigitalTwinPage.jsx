@@ -130,13 +130,18 @@ const DigitalTwinPage = () => {
         scene.add(bodyGroup)
 
         const loader = new GLTFLoader()
-        const isFemale = userData?.gender?.toLowerCase() === 'female' || userData?.sex?.toLowerCase() === 'female'
+        // Check all possible gender/sex field variations
+        const userGender = (userData?.gender || userData?.sex || '').toLowerCase()
+        const isFemale = userGender === 'female'
         const suffix = isFemale ? '_female' : ''
+
+        console.log('🔍 User Data:', userData)
+        console.log(`👤 Detected Gender: ${userGender}, Loading ${isFemale ? 'FEMALE' : 'MALE'} body model`)
 
         // 1. Load Body
         loader.load(`/models/skin${suffix}.glb`, (gltf) => {
             const model = gltf.scene
-            console.log('✅ Body model loaded successfully')
+            console.log(`✅ Body model loaded successfully: skin${suffix}.glb`)
             model.traverse((child) => {
                 if (child.isMesh) {
                     child.material = new THREE.MeshPhongMaterial({
