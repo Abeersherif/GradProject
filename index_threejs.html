@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MedTwin: Pro Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --danger: #ff0055;
+            --warning: #ffaa00;
+            --success: #00ff88;
+            --glass: rgba(10, 15, 30, 0.65);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #050510;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+        }
+
+        #ui-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            grid-template-rows: 80px 1fr 100px;
+            padding: 20px;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .hud-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            pointer-events: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #666;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            margin-top: 25px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 5px;
+        }
+
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .vital-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 2px solid #333;
+        }
+
+        .vital-label {
+            font-size: 0.7rem;
+            color: #888;
+            display: block;
+        }
+
+        .vital-num {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #eee;
+        }
+
+        .header-bar {
+            grid-column: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .scan-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin-top: 10px;
+            opacity: 0.5;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .time-control {
+            grid-column: 2;
+            grid-row: 3;
+            align-self: end;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 40px;
+            padding: 15px 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        input[type=range] {
+            flex: 1;
+            cursor: pointer;
+            accent-color: var(--secondary);
+        }
+
+        .year-display {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        #organ-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(20px, -50%);
+            width: 280px;
+            background: rgba(10, 15, 20, 0.95);
+            border: 1px solid var(--secondary);
+            border-radius: 4px;
+            padding: 20px;
+            display: none;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        #organ-popup::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: -20px;
+            width: 20px;
+            height: 1px;
+            background: var(--secondary);
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .bg-safe {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .bg-danger {
+            background: rgba(255, 0, 85, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .bg-warn {
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: #050510;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.8s;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #222;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .organ-item {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 6px;
+        }
+
+        .organ-item:hover {
+            background: rgba(79, 172, 254, 0.1);
+            border-left: 3px solid var(--secondary);
+        }
+
+        /* Cognitive Modal */
+        #cognitive-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Three.js Canvas -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Loading Screen -->
+    <div id="loader" class="loading">
+        <div class="loading-spinner"></div>
+        <h1 style="margin-top: 30px; font-size: 2rem;">MEDTWIN</h1>
+        <p style="color: #666; margin-top: 10px;">INITIALIZING 3D BIOMETRIC ENGINE...</p>
+    </div>
+
+    <!-- UI Overlay -->
+    <div id="ui-layer">
+        <!-- LEFT: Patient Profile -->
+        <div class="hud-panel" style="grid-row: 1 / span 2; overflow-y: auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h1>Subject 001</h1>
+                <div id="status-dot"
+                    style="width:10px; height:10px; background:var(--success); border-radius:50%; box-shadow: 0 0 10px var(--success);">
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <input type="text" id="pid" value="DM_00000"
+                    style="background:#111; border:1px solid #333; color:#fff; padding:8px; width:60%; border-radius:4px;">
+                <button onclick="fetchData(0)"
+                    style="background:var(--secondary); border:none; padding:8px 15px; border-radius:4px; font-weight:600; cursor:pointer;">LOAD</button>
+            </div>
+
+            <h2>Biometrics</h2>
+            <div class="vitals-grid">
+                <div class="vital-card"><span class="vital-label">AGE</span><span class="vital-num"
+                        id="val-age">--</span></div>
+                <div class="vital-card"><span class="vital-label">SEX</span><span class="vital-num"
+                        id="val-gender">--</span></div>
+                <div class="vital-card" style="border-left-color: var(--warning);"><span
+                        class="vital-label">HBA1C</span><span class="vital-num" id="val-hba1c">--</span></div>
+                <div class="vital-card"><span class="vital-label">BMI</span><span class="vital-num"
+                        id="val-bmi">--</span></div>
+            </div>
+
+            <h2>Cognitive Brain Analysis</h2>
+            <button id="cognitive-btn" onclick="openCognitiveModal()" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                       border: 1px solid var(--secondary); border-radius: 8px; color: #fff; cursor: pointer;
+                       display: flex; align-items: center; gap: 10px; justify-content: center;
+                       transition: all 0.3s ease; font-family: 'Inter', sans-serif;">
+                <span style="font-size: 1.5rem;">🧠</span>
+                <div style="text-align: left;">
+                    <div style="font-weight: 600; font-size: 0.9rem;">View AI Analysis</div>
+                    <div id="cognitive-preview"
+                        style="font-size: 0.7rem; color: #888; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        Click to see predictions...</div>
+                </div>
+                <span style="margin-left: auto; color: var(--secondary);">→</span>
+            </button>
+            <div id="status-feed" style="display: none;"></div>
+        </div>
+
+        <!-- CENTER HEADER -->
+        <div class="header-bar">
+            <h1 style="font-size:1rem; letter-spacing:3px; color:#4facfe;">PREDICTIVE ANALYSIS</h1>
+            <div class="scan-line"></div>
+        </div>
+
+        <!-- BOTTOM: Time Controller -->
+        <div class="time-control">
+            <span style="font-size:0.8rem; color:#888;">TIMELINE SCROLLER</span>
+            <input type="range" id="time-slider" min="0" max="10" value="0" step="1" oninput="updateTime(this.value)">
+            <div class="year-display"><span id="year-text">2025</span></div>
+        </div>
+
+        <!-- RIGHT: Organ List -->
+        <div class="hud-panel" style="grid-row: 1 / span 2; grid-column: 3;">
+            <h1>Organ Systems</h1>
+            <div id="organ-list" style="margin-top: 20px;"></div>
+            <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 10px;">
+                <p style="font-size:0.7rem; color:#555;">INTERACTION MODE: ACTIVE<br>CLICK ORGANS FOR DETAILS</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Detail Card -->
+    <div id="organ-popup">
+        <h3 id="pop-title" style="margin:0; color:#fff;">HEART</h3>
+        <span id="pop-badge" class="risk-badge bg-safe">LOW RISK</span>
+        <p id="pop-desc" style="font-size:0.8rem; color:#ccc; margin-top:10px; line-height:1.4;">
+            Function metrics within normal range.
+        </p>
+        <div class="vital-card" style="margin-top:10px; background:rgba(0,0,0,0.3);">
+            <span class="vital-label">PREDICTED DEGRADATION</span>
+            <span class="vital-num" id="pop-val">0%</span>
+        </div>
+    </div>
+
+    <!-- Cognitive Modal -->
+    <div id="cognitive-modal">
+        <div style="background: linear-gradient(145deg, #0d1117 0%, #161b22 100%); 
+                    border: 1px solid #30363d; border-radius: 16px; 
+                    max-width: 900px; width: 95%; max-height: 90vh; overflow: hidden;
+                    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);">
+            <div style="background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); 
+                        padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
+                        border-bottom: 1px solid #30363d;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.8rem;">🧠</span>
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.1rem; color: #fff; letter-spacing: 1px;">COGNITIVE BRAIN
+                            ANALYSIS</h2>
+                        <p id="modal-year-label" style="margin: 3px 0 0; font-size: 0.75rem; color: #4facfe;">Year 2025
+                            Projection</p>
+                    </div>
+                </div>
+                <button onclick="closeCognitiveModal()" style="background: rgba(255,255,255,0.1); border: none; color: #fff; 
+                               padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">✕
+                    Close</button>
+            </div>
+            <div id="modal-content" style="padding: 25px 30px 50px 30px; overflow-y: auto; max-height: calc(90vh - 80px);
+                                           font-size: 1rem; line-height: 1.7; color: #c9d1d9;">
+                <p style="color: #888;">Loading analysis...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Import -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ============ SCENE SETUP ============
+        const canvas = document.getElementById('three-canvas');
+        const scene = new THREE.Scene();
+
+        // Camera
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 8);
+
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x050510, 1);
+
+        // Controls
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 4;
+        controls.maxDistance = 15;
+        controls.enablePan = false;
+
+        // ============ LIGHTING ============
+        const ambientLight = new THREE.AmbientLight(0x404080, 0.5);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+        mainLight.position.set(5, 5, 5);
+        scene.add(mainLight);
+
+        const fillLight = new THREE.DirectionalLight(0x4facfe, 0.3);
+        fillLight.position.set(-5, 0, -5);
+        scene.add(fillLight);
+
+        const rimLight = new THREE.PointLight(0x00f2fe, 0.5, 20);
+        rimLight.position.set(0, 5, -5);
+        scene.add(rimLight);
+
+        // ============ PARTICLES BACKGROUND ============
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 30;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.02,
+            color: 0x4facfe,
+            transparent: true,
+            opacity: 0.6
+        });
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        // ============ HUMAN BODY SILHOUETTE ============
+        const bodyMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x1a2a4a,
+            transparent: true,
+            opacity: 0.15,
+            roughness: 0.8,
+            metalness: 0.2,
+            side: THREE.DoubleSide
+        });
+
+        // Torso (capsule-like shape)
+        const torsoGeometry = new THREE.CapsuleGeometry(0.8, 2.5, 16, 32);
+        const torso = new THREE.Mesh(torsoGeometry, bodyMaterial);
+        torso.position.set(0, 0.5, 0);
+        scene.add(torso);
+
+        // Head
+        const headGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+        const head = new THREE.Mesh(headGeometry, bodyMaterial);
+        head.position.set(0, 2.5, 0);
+        scene.add(head);
+
+        // ============ ORGAN DEFINITIONS ============
+        const organColors = {
+            safe: new THREE.Color(0x00ff88),
+            warning: new THREE.Color(0xffaa00),
+            danger: new THREE.Color(0xff0055)
+        };
+
+        function createOrganMaterial(color) {
+            return new THREE.MeshPhysicalMaterial({
+                color: color,
+                emissive: color,
+                emissiveIntensity: 0.3,
+                roughness: 0.4,
+                metalness: 0.1,
+                transparent: true,
+                opacity: 0.9
+            });
+        }
+
+        // Organ meshes storage
+        const organs = {};
+
+        // HEART - Stylized heart shape
+        const heartShape = new THREE.Shape();
+        const x = 0, y = 0;
+        heartShape.moveTo(x, y + 0.25);
+        heartShape.bezierCurveTo(x, y + 0.25, x - 0.25, y, x - 0.25, y);
+        heartShape.bezierCurveTo(x - 0.55, y, x - 0.55, y + 0.35, x - 0.55, y + 0.35);
+        heartShape.bezierCurveTo(x - 0.55, y + 0.55, x - 0.35, y + 0.77, x, y + 0.95);
+        heartShape.bezierCurveTo(x + 0.35, y + 0.77, x + 0.55, y + 0.55, x + 0.55, y + 0.35);
+        heartShape.bezierCurveTo(x + 0.55, y + 0.35, x + 0.55, y, x + 0.25, y);
+        heartShape.bezierCurveTo(x + 0.1, y, x, y + 0.25, x, y + 0.25);
+
+        const heartExtrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.05, bevelSegments: 3 };
+        const heartGeometry = new THREE.ExtrudeGeometry(heartShape, heartExtrudeSettings);
+        heartGeometry.center();
+        const heartMesh = new THREE.Mesh(heartGeometry, createOrganMaterial(organColors.safe));
+        heartMesh.position.set(-0.3, 1.2, 0.5);
+        heartMesh.rotation.set(Math.PI, 0, 0);
+        heartMesh.scale.set(0.8, 0.8, 0.8);
+        heartMesh.userData = { name: 'heart', displayName: 'Heart' };
+        organs.heart = heartMesh;
+        scene.add(heartMesh);
+
+        // PANCREAS - Elongated curved shape
+        const pancreasGeometry = new THREE.CapsuleGeometry(0.15, 0.8, 8, 16);
+        const pancreasMesh = new THREE.Mesh(pancreasGeometry, createOrganMaterial(organColors.safe));
+        pancreasMesh.position.set(0, 0.3, 0.4);
+        pancreasMesh.rotation.set(0, 0, Math.PI / 6);
+        pancreasMesh.userData = { name: 'pancreas', displayName: 'Pancreas' };
+        organs.pancreas = pancreasMesh;
+        scene.add(pancreasMesh);
+
+        // KIDNEYS - Two bean shapes
+        const kidneyGeometry = new THREE.SphereGeometry(0.25, 16, 16);
+        kidneyGeometry.scale(0.6, 1, 0.5);
+
+        const leftKidney = new THREE.Mesh(kidneyGeometry, createOrganMaterial(organColors.safe));
+        leftKidney.position.set(-0.7, 0, 0.2);
+        leftKidney.userData = { name: 'kidneys', displayName: 'Kidneys' };
+        organs.kidneys = leftKidney;
+        scene.add(leftKidney);
+
+        const rightKidney = new THREE.Mesh(kidneyGeometry.clone(), createOrganMaterial(organColors.safe));
+        rightKidney.position.set(0.7, 0, 0.2);
+        rightKidney.userData = { name: 'kidneys_right', displayName: 'Kidneys', isSecondary: true };
+        scene.add(rightKidney);
+
+        // BLOOD VESSELS - Network representation
+        const vesselMaterial = createOrganMaterial(organColors.safe);
+        const vesselGroup = new THREE.Group();
+
+        // Main artery
+        const arteryGeometry = new THREE.CylinderGeometry(0.03, 0.03, 2, 8);
+        const aorta = new THREE.Mesh(arteryGeometry, vesselMaterial);
+        aorta.position.set(0.1, 0.5, 0.3);
+        vesselGroup.add(aorta);
+
+        // Branch vessels
+        for (let i = 0; i < 4; i++) {
+            const branchGeometry = new THREE.CylinderGeometry(0.015, 0.015, 0.5, 6);
+            const branch = new THREE.Mesh(branchGeometry, vesselMaterial);
+            branch.position.set(0.1, 0.8 - i * 0.4, 0.3);
+            branch.rotation.z = (i % 2 === 0 ? 1 : -1) * Math.PI / 4;
+            vesselGroup.add(branch);
+        }
+
+        vesselGroup.userData = { name: 'vessels', displayName: 'Blood Vessels' };
+        organs.vessels = vesselGroup;
+        scene.add(vesselGroup);
+
+        // EYES - Two spheres
+        const eyeGeometry = new THREE.SphereGeometry(0.12, 16, 16);
+        const leftEye = new THREE.Mesh(eyeGeometry, createOrganMaterial(organColors.safe));
+        leftEye.position.set(-0.2, 2.55, 0.4);
+        leftEye.userData = { name: 'eyes', displayName: 'Eyes' };
+        organs.eyes = leftEye;
+        scene.add(leftEye);
+
+        const rightEye = new THREE.Mesh(eyeGeometry.clone(), createOrganMaterial(organColors.safe));
+        rightEye.position.set(0.2, 2.55, 0.4);
+        rightEye.userData = { name: 'eyes_right', displayName: 'Eyes', isSecondary: true };
+        scene.add(rightEye);
+
+        // ============ GRID / FLOOR ============
+        const gridHelper = new THREE.GridHelper(20, 40, 0x1a2a4a, 0x0a1020);
+        gridHelper.position.y = -2.5;
+        scene.add(gridHelper);
+
+        // ============ RAYCASTER FOR INTERACTION ============
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let hoveredOrgan = null;
+        const originalScales = {};
+
+        // Store original scales
+        Object.entries(organs).forEach(([name, mesh]) => {
+            if (mesh.isGroup) {
+                originalScales[name] = mesh.scale.clone();
+            } else {
+                originalScales[name] = mesh.scale.clone();
+            }
+        });
+
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function onClick(event) {
+            raycaster.setFromCamera(mouse, camera);
+            const organMeshes = Object.values(organs).flatMap(o => o.isGroup ? o.children : [o]);
+            const intersects = raycaster.intersectObjects(organMeshes, true);
+
+            if (intersects.length > 0) {
+                let clicked = intersects[0].object;
+                while (clicked.parent && !clicked.userData.name) {
+                    clicked = clicked.parent;
+                }
+                if (clicked.userData.name) {
+                    showOrganPopup(clicked.userData.name);
+                }
+            }
+        }
+
+        canvas.addEventListener('mousemove', onMouseMove);
+        canvas.addEventListener('click', onClick);
+
+        // ============ ORGAN POPUP ============
+        const popup = document.getElementById('organ-popup');
+
+        window.showOrganPopup = function (organName) {
+            const data = window.currentData?.[organName] || { risk_level: 'LOW', degradation: '0%' };
+            const displayName = organName.charAt(0).toUpperCase() + organName.slice(1);
+
+            document.getElementById('pop-title').innerText = displayName.toUpperCase();
+            document.getElementById('pop-desc').innerText = data.description || 'Awaiting patient data...';
+            document.getElementById('pop-val').innerText = data.degradation || '0%';
+
+            const badge = document.getElementById('pop-badge');
+            badge.innerText = (data.risk_level || 'LOW').toUpperCase() + ' RISK';
+            badge.className = 'risk-badge ' + (
+                data.risk_level === 'high' ? 'bg-danger' :
+                    data.risk_level === 'moderate' ? 'bg-warn' : 'bg-safe'
+            );
+
+            popup.style.display = 'block';
+            setTimeout(() => popup.style.display = 'none', 4000);
+        };
+
+        // ============ UPDATE ORGAN COLORS ============
+        window.updateOrganColors = function (dataMap) {
+            const colorMap = {
+                'green': organColors.safe,
+                'yellow': organColors.warning,
+                'red': organColors.danger
+            };
+
+            Object.entries(dataMap).forEach(([name, data]) => {
+                const organ = organs[name];
+                if (!organ) return;
+
+                const color = colorMap[data.color] || organColors.safe;
+
+                if (organ.isGroup) {
+                    organ.children.forEach(child => {
+                        if (child.material) {
+                            child.material.color.copy(color);
+                            child.material.emissive.copy(color);
+                        }
+                    });
+                } else {
+                    organ.material.color.copy(color);
+                    organ.material.emissive.copy(color);
+                }
+
+                // Update paired organs (right kidney, right eye)
+                const rightOrgan = scene.getObjectByProperty('userData', { name: name + '_right' });
+                if (rightOrgan && rightOrgan.material) {
+                    rightOrgan.material.color.copy(color);
+                    rightOrgan.material.emissive.copy(color);
+                }
+            });
+
+            // Special handling for paired organs
+            if (dataMap.kidneys) {
+                const rightKidneyMesh = scene.children.find(c => c.userData?.name === 'kidneys_right');
+                if (rightKidneyMesh) {
+                    const color = colorMap[dataMap.kidneys.color] || organColors.safe;
+                    rightKidneyMesh.material.color.copy(color);
+                    rightKidneyMesh.material.emissive.copy(color);
+                }
+            }
+            if (dataMap.eyes) {
+                const rightEyeMesh = scene.children.find(c => c.userData?.name === 'eyes_right');
+                if (rightEyeMesh) {
+                    const color = colorMap[dataMap.eyes.color] || organColors.safe;
+                    rightEyeMesh.material.color.copy(color);
+                    rightEyeMesh.material.emissive.copy(color);
+                }
+            }
+        };
+
+        // ============ ANIMATION LOOP ============
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            // Rotate particles slowly
+            particlesMesh.rotation.y = time * 0.02;
+
+            // Subtle heart pulse
+            if (organs.heart) {
+                const pulse = 1 + Math.sin(time * 4) * 0.03;
+                organs.heart.scale.set(0.8 * pulse, 0.8 * pulse, 0.8 * pulse);
+            }
+
+            // Hover detection
+            raycaster.setFromCamera(mouse, camera);
+            const organMeshes = Object.values(organs).flatMap(o => o.isGroup ? o.children : [o]);
+            const intersects = raycaster.intersectObjects(organMeshes, true);
+
+            // Reset all organs
+            Object.entries(organs).forEach(([name, mesh]) => {
+                if (mesh.isGroup) {
+                    mesh.scale.copy(originalScales[name]);
+                } else if (!mesh.userData.name?.includes('heart')) {
+                    mesh.scale.copy(originalScales[name]);
+                }
+            });
+
+            // Scale up hovered organ
+            if (intersects.length > 0) {
+                let hovered = intersects[0].object;
+                while (hovered.parent && !hovered.userData.name) {
+                    hovered = hovered.parent;
+                }
+                if (hovered.userData.name && organs[hovered.userData.name]) {
+                    const org = organs[hovered.userData.name];
+                    if (org.isGroup) {
+                        org.scale.copy(originalScales[hovered.userData.name]).multiplyScalar(1.1);
+                    } else {
+                        org.scale.copy(originalScales[hovered.userData.name]).multiplyScalar(1.15);
+                    }
+                    canvas.style.cursor = 'pointer';
+                } else {
+                    canvas.style.cursor = 'default';
+                }
+            } else {
+                canvas.style.cursor = 'default';
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // ============ RESIZE HANDLER ============
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ============ START ============
+        animate();
+
+        // Hide loader
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 800);
+        }, 1500);
+
+        // Make functions global
+        window.THREE = THREE;
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <script>
+        // Use current origin for API calls (works in dev and prod)
+        const API = window.location.origin;
+
+        // --- API & DATA ---
+        window.fetchData = async (years) => {
+            const pid = document.getElementById('pid').value;
+            const yearsInt = parseInt(years) || 0;
+
+            const preview = document.getElementById('cognitive-preview');
+            if (preview) preview.innerText = 'Analyzing...';
+
+            try {
+                // Fetch demographics
+                const r1 = await fetch(`${API}/twin/${pid}`);
+                const d1 = await r1.json();
+                document.getElementById('val-age').innerText = d1.demographics.age;
+                document.getElementById('val-gender').innerText = d1.demographics.gender;
+                document.getElementById('val-bmi').innerText = d1.demographics.bmi;
+
+                // Viz Data
+                const r2 = await fetch(`${API}/twin/${pid}/visualization-data?years_ahead=${yearsInt}`);
+                const data = await r2.json();
+
+                document.getElementById('val-hba1c').innerText = data.organs.pancreas.hba1c + "%";
+
+                // Update organ list
+                updateList(data.organs);
+
+                // Update 3D organ colors
+                if (window.updateOrganColors) {
+                    window.updateOrganColors(data.organs);
+                }
+
+                // Update Status Feed (Cognitive Agent Output)
+                if (data.summary && data.summary.cognitive_prediction) {
+                    const feed = document.getElementById('status-feed');
+                    feed.innerText = data.summary.cognitive_prediction;
+                    feed.style.color = data.summary.overall_control === 'poor' ? '#ff0055' : '#00ff88';
+
+                    if (preview) {
+                        const firstLine = data.summary.cognitive_prediction.split('\n')[0].substring(0, 35);
+                        preview.innerText = firstLine + '...';
+                    }
+
+                    window.cognitiveData = {
+                        text: data.summary.cognitive_prediction,
+                        control: data.summary.overall_control,
+                        year: 2025 + yearsInt,
+                        projected_hba1c: data.projected_hba1c
+                    };
+                }
+
+                window.currentData = data.organs;
+
+            } catch (e) {
+                console.error("API Error", e);
+                document.getElementById('cognitive-preview').innerText = 'API unavailable - demo mode';
+            }
+        };
+
+        window.updateTime = (val) => {
+            document.getElementById('year-text').innerText = 2025 + parseInt(val);
+            fetchData(val);
+        };
+
+        // Cognitive Modal Functions
+        window.openCognitiveModal = () => {
+            const modal = document.getElementById('cognitive-modal');
+            const content = document.getElementById('modal-content');
+            const yearLabel = document.getElementById('modal-year-label');
+
+            if (window.cognitiveData) {
+                yearLabel.innerText = `Year ${window.cognitiveData.year} Projection`;
+
+                let formatted = window.cognitiveData.text
+                    .replace(/^### (.*?)$/gm, '<h4 style="color: #58a6ff; margin: 15px 0 8px; font-size: 1rem;">$1</h4>')
+                    .replace(/^## (.*?)$/gm, '<h3 style="color: #4facfe; margin: 20px 0 10px; font-size: 1.1rem; border-bottom: 1px solid #30363d; padding-bottom: 5px;">$1</h3>')
+                    .replace(/^# (.*?)$/gm, '<h2 style="color: #fff; margin: 20px 0 10px; font-size: 1.2rem;">$1</h2>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #58a6ff;">$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/^- (.*?)$/gm, '<li style="margin: 5px 0; margin-left: 20px; list-style: none;">• $1</li>')
+                    .replace(/\n\n/g, '</p><p style="margin: 12px 0;">')
+                    .replace(/\n/g, '<br>');
+
+                formatted = formatted
+                    .replace(/HIGH/g, '<span style="color: #ff0055; font-weight: bold;">HIGH</span>')
+                    .replace(/MODERATE/g, '<span style="color: #ffaa00; font-weight: bold;">MODERATE</span>')
+                    .replace(/LOW/g, '<span style="color: #00ff88; font-weight: bold;">LOW</span>')
+                    .replace(/POOR/g, '<span style="color: #ff0055; font-weight: bold;">POOR</span>')
+                    .replace(/FAIR/g, '<span style="color: #ffaa00; font-weight: bold;">FAIR</span>')
+                    .replace(/GOOD/g, '<span style="color: #00ff88; font-weight: bold;">GOOD</span>');
+
+                content.innerHTML = `<div style="margin: 0;">${formatted}</div>`;
+
+                const borderColor = window.cognitiveData.control === 'poor' ? '#ff0055' :
+                    window.cognitiveData.control === 'fair' ? '#ffaa00' : '#00ff88';
+                content.style.borderLeft = `4px solid ${borderColor}`;
+            } else {
+                content.innerHTML = '<p style="color: #888;">No analysis available. Load a patient first.</p>';
+            }
+
+            modal.style.display = 'flex';
+        };
+
+        window.closeCognitiveModal = () => {
+            document.getElementById('cognitive-modal').style.display = 'none';
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeCognitiveModal();
+        });
+
+        function updateList(dataMap) {
+            const list = document.getElementById('organ-list');
+            list.innerHTML = "";
+            for (let [key, val] of Object.entries(dataMap)) {
+                const colors = { 'green': '#00ff88', 'yellow': '#ffaa00', 'red': '#ff0055' };
+                const c = colors[val.color] || '#aaa';
+
+                const item = document.createElement('div');
+                item.className = 'organ-item';
+                item.onclick = () => window.showOrganPopup && window.showOrganPopup(key);
+                item.innerHTML = `
+                    <span style="color:#eee; text-transform:uppercase; font-size:0.9rem;">${key}</span>
+                    <span style="color:${c}; font-weight:700; font-size:0.8rem;">${val.risk_level}</span>
+                `;
+                list.appendChild(item);
+            }
+        }
+
+        // Initialize with demo data if API is unavailable
+        setTimeout(() => {
+            fetchData(0);
+        }, 2000);
+    </script>
+</body>
+
+</html>

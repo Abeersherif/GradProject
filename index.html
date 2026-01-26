@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MedTwin: Pro Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --danger: #ff0055;
+            --warning: #ffaa00;
+            --success: #00ff88;
+            --glass: rgba(10, 15, 30, 0.65);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #050510;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #babylon-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            touch-action: none;
+        }
+
+        #ui-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            grid-template-rows: 80px 1fr 100px;
+            padding: 20px;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .hud-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            pointer-events: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #666;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            margin-top: 25px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 5px;
+        }
+
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .vital-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 2px solid #333;
+        }
+
+        .vital-label {
+            font-size: 0.7rem;
+            color: #888;
+            display: block;
+        }
+
+        .vital-num {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #eee;
+        }
+
+        .header-bar {
+            grid-column: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .scan-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin-top: 10px;
+            opacity: 0.5;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .time-control {
+            grid-column: 2;
+            grid-row: 3;
+            align-self: end;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 40px;
+            padding: 15px 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        input[type=range] {
+            flex: 1;
+            cursor: pointer;
+            accent-color: var(--secondary);
+        }
+
+        .year-display {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .bg-safe {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .bg-danger {
+            background: rgba(255, 0, 85, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .bg-warn {
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: #050510;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.8s;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #222;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .organ-item {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 6px;
+        }
+
+        .organ-item:hover {
+            background: rgba(79, 172, 254, 0.1);
+            border-left: 3px solid var(--secondary);
+        }
+
+        #organ-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(20px, -50%);
+            width: 280px;
+            background: rgba(10, 15, 20, 0.95);
+            border: 1px solid var(--secondary);
+            border-radius: 4px;
+            padding: 20px;
+            display: none;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        #cognitive-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+            font-size: 0.75rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="babylon-canvas"></canvas>
+
+    <div id="loader" class="loading">
+        <div class="loading-spinner"></div>
+        <h1 style="margin-top: 30px; font-size: 2rem;">MEDTWIN</h1>
+        <p id="loading-text" style="color: #666; margin-top: 10px;">Loading realistic organs...</p>
+    </div>
+
+    <div id="ui-layer">
+        <div class="hud-panel" style="grid-row: 1 / span 2; overflow-y: auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h1>Subject 001</h1>
+                <div id="status-dot"
+                    style="width:10px; height:10px; background:var(--success); border-radius:50%; box-shadow: 0 0 10px var(--success);">
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <input type="text" id="pid" value="DM_00000"
+                    style="background:#111; border:1px solid #333; color:#fff; padding:8px; width:60%; border-radius:4px;">
+                <button onclick="fetchData(0)"
+                    style="background:var(--secondary); border:none; padding:8px 15px; border-radius:4px; font-weight:600; cursor:pointer;">LOAD</button>
+            </div>
+
+            <h2>Biometrics</h2>
+            <div class="vitals-grid">
+                <div class="vital-card"><span class="vital-label">AGE</span><span class="vital-num"
+                        id="val-age">--</span></div>
+                <div class="vital-card"><span class="vital-label">SEX</span><span class="vital-num"
+                        id="val-gender">--</span></div>
+                <div class="vital-card" style="border-left-color: var(--warning);"><span
+                        class="vital-label">HBA1C</span><span class="vital-num" id="val-hba1c">--</span></div>
+                <div class="vital-card"><span class="vital-label">BMI</span><span class="vital-num"
+                        id="val-bmi">--</span></div>
+            </div>
+
+            <h2>Risk Legend</h2>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #00ff88;"></div> Low Risk - Healthy
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #ffaa00;"></div> Moderate Risk
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #ff0055;"></div> High Risk - Critical
+            </div>
+
+            <h2>Cognitive Brain Analysis</h2>
+            <button id="cognitive-btn" onclick="openCognitiveModal()"
+                style="width: 100%; padding: 15px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid var(--secondary); border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 10px; justify-content: center;">
+                <span style="font-size: 1.5rem;">🧠</span>
+                <div style="text-align: left;">
+                    <div style="font-weight: 600; font-size: 0.9rem;">View AI Analysis</div>
+                    <div id="cognitive-preview" style="font-size: 0.7rem; color: #888;">Click to see predictions...
+                    </div>
+                </div>
+                <span style="margin-left: auto; color: var(--secondary);">→</span>
+            </button>
+        </div>
+
+        <div class="header-bar">
+            <h1 style="font-size:1rem; letter-spacing:3px; color:#4facfe;">PREDICTIVE ORGAN ANALYSIS</h1>
+            <div class="scan-line"></div>
+        </div>
+
+        <div class="time-control">
+            <span style="font-size:0.8rem; color:#888;">FUTURE PREDICTION</span>
+            <input type="range" id="time-slider" min="0" max="10" value="0" step="1" oninput="updateTime(this.value)">
+            <div class="year-display"><span id="year-text">2025</span></div>
+        </div>
+
+        <div class="hud-panel" style="grid-row: 1 / span 2; grid-column: 3;">
+            <h1>Organ Systems</h1>
+            <p style="font-size:0.7rem; color:#666; margin-top:5px;">Click organ to focus</p>
+            <div id="organ-list" style="margin-top: 20px;"></div>
+            <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 10px;">
+                <p style="font-size:0.7rem; color:#555;">🔄 ROTATE: Drag<br>🔍 ZOOM: Scroll<br>🎯 FOCUS: Click organ</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="organ-popup">
+        <h3 id="pop-title" style="margin:0; color:#fff;">HEART</h3>
+        <span id="pop-badge" class="risk-badge bg-safe">LOW RISK</span>
+        <p id="pop-desc" style="font-size:0.8rem; color:#ccc; margin-top:10px; line-height:1.4;"></p>
+        <div class="vital-card" style="margin-top:10px; background:rgba(0,0,0,0.3);">
+            <span class="vital-label">PREDICTED DEGRADATION</span>
+            <span class="vital-num" id="pop-val">0%</span>
+        </div>
+    </div>
+
+    <div id="cognitive-modal">
+        <div
+            style="background: linear-gradient(145deg, #0d1117 0%, #161b22 100%); border: 1px solid #30363d; border-radius: 16px; max-width: 900px; width: 95%; max-height: 90vh; overflow: hidden;">
+            <div
+                style="background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.8rem;">🧠</span>
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.1rem; color: #fff;">COGNITIVE BRAIN ANALYSIS</h2>
+                        <p id="modal-year-label" style="margin: 3px 0 0; font-size: 0.75rem; color: #4facfe;">Year 2025
+                        </p>
+                    </div>
+                </div>
+                <button onclick="closeCognitiveModal()"
+                    style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer;">✕
+                    Close</button>
+            </div>
+            <div id="modal-content"
+                style="padding: 25px 30px 50px 30px; overflow-y: auto; max-height: calc(90vh - 80px); font-size: 1rem; line-height: 1.7; color: #c9d1d9;">
+                <p style="color: #888;">Loading analysis...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Babylon.js -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+
+    <script>
+        // Use current origin for API calls (works in dev and prod)
+        const API = window.location.origin;
+
+        // Organ models and meshes
+        const organMeshes = {};
+        let scene, camera, engine;
+
+        // Realistic organ base colors (anatomical)
+        const ORGAN_COLORS = {
+            heart: new BABYLON.Color3(0.8, 0.3, 0.35),      // Pinkish-red
+            pancreas: new BABYLON.Color3(0.9, 0.65, 0.4),   // Orange-tan
+            kidneys: new BABYLON.Color3(0.7, 0.35, 0.3),    // Reddish-brown
+            vessels: new BABYLON.Color3(0.9, 0.2, 0.25),    // Bright red
+            eyes: new BABYLON.Color3(0.9, 0.9, 0.85)        // Off-white
+        };
+
+        // Damage modifiers - MORE OBVIOUS effects
+        const DAMAGE_EFFECTS = {
+            green: { darken: 0, desaturate: 0, inflame: 0 },         // Healthy - normal colors
+            yellow: { darken: 0.25, desaturate: 0.2, inflame: 0.35 }, // Moderate - MORE noticeable
+            red: { darken: 0.45, desaturate: 0.4, inflame: 0.7 }      // Critical - VERY dark/diseased
+        };
+
+        function updateLoadingText(text) {
+            document.getElementById('loading-text').innerText = text;
+        }
+
+        async function initBabylon() {
+            const canvas = document.getElementById('babylon-canvas');
+            engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+
+            scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color4(0.02, 0.02, 0.06, 1);
+
+            // Camera
+            camera = new BABYLON.ArcRotateCamera("camera", Math.PI / 2, Math.PI / 2.5, 3, BABYLON.Vector3.Zero(), scene);
+            camera.attachControl(canvas, true);
+            camera.wheelPrecision = 50;
+            camera.minZ = 0.01;
+            camera.lowerRadiusLimit = 0.5;
+            camera.upperRadiusLimit = 8;
+
+            // Focus on upper body/torso
+            camera.target = new BABYLON.Vector3(0, 0.3, 0);  // Slightly above center
+            camera.beta = Math.PI / 2.2;  // Looking slightly from above
+
+            // Lighting
+            const hemi = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0), scene);
+            hemi.intensity = 0.6;
+
+            const dir = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(-1, -2, -1), scene);
+            dir.intensity = 0.8;
+
+            const point = new BABYLON.PointLight("point", new BABYLON.Vector3(2, 2, 2), scene);
+            point.intensity = 0.4;
+
+            // Load organ models
+            await loadOrgans();
+
+            // Start render loop
+            engine.runRenderLoop(() => scene.render());
+            window.addEventListener('resize', () => engine.resize());
+
+            // Hide loader
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 800);
+            }, 500);
+        }
+
+        // Current patient gender (will be updated when data loads)
+        let currentGender = 'Male';
+        let bodyGroup = null;
+
+        async function loadOrgans(gender = 'Male') {
+            const isFemale = gender.toLowerCase() === 'female';
+            const suffix = isFemale ? '_female' : '';
+
+            // Define organ configurations based on gender
+            // Eyes will be created procedurally for correct positioning
+            const organConfigs = [
+                { id: 'skin', file: `models/skin${suffix}.glb`, transparent: true, friendly: true },
+                { id: 'heart', file: `models/heart${suffix}.glb`, transparent: false },
+                { id: 'pancreas', file: `models/pancreas${suffix}.glb`, transparent: false },
+                { id: 'kidneys', file: `models/kidney_left${suffix}.glb`, transparent: false },
+                { id: 'kidneys_r', file: `models/kidney_right${suffix}.glb`, transparent: false },
+                { id: 'vessels', file: 'models/blood_vasculature.glb', transparent: false, opacity: 0.85 }
+            ];
+
+            console.log(`Loading ${gender} body model...`);
+
+            // Clear existing models if reloading
+            if (bodyGroup) {
+                bodyGroup.dispose();
+                Object.keys(organMeshes).forEach(key => delete organMeshes[key]);
+            }
+
+            // Create container for all models
+            bodyGroup = new BABYLON.TransformNode("bodyGroup", scene);
+
+            for (const config of organConfigs) {
+                updateLoadingText(`Loading ${config.id}...`);
+                try {
+                    const result = await BABYLON.SceneLoader.ImportMeshAsync("", "", config.file, scene);
+
+                    if (result.meshes.length > 0) {
+                        const root = result.meshes[0];
+                        root.parent = bodyGroup;
+
+                        // Store meshes for color updates (skip skin)
+                        // Merge left/right pairs into single organ ID
+                        let organId = config.id;
+                        if (config.id === 'kidneys_r') organId = 'kidneys';
+                        if (config.id === 'eyes_r') organId = 'eyes';
+
+                        if (config.id !== 'skin') {
+                            if (!organMeshes[organId]) {
+                                organMeshes[organId] = [];
+                            }
+                            // Store all child meshes for color updates
+                            result.meshes.forEach(mesh => {
+                                if (mesh.geometry) {
+                                    organMeshes[organId].push(mesh);
+                                }
+                            });
+                        }
+
+                        // Apply materials
+                        result.meshes.forEach(mesh => {
+                            if (mesh.geometry) {
+                                // Keep original material for realistic eyes (iris, pupil, etc.)
+                                if (config.realistic) {
+                                    // Eyes - keep original look, just enhance slightly
+                                    if (mesh.material) {
+                                        mesh.material.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+                                    }
+                                    return;  // Don't replace material
+                                }
+
+                                const mat = new BABYLON.StandardMaterial(`${config.id}_mat_${mesh.id}`, scene);
+
+                                if (config.transparent || config.id === 'skin' || config.friendly) {
+                                    // WHITE body - shows organs clearly
+                                    mat.diffuseColor = new BABYLON.Color3(0.95, 0.95, 0.98);  // White
+                                    mat.emissiveColor = new BABYLON.Color3(0.4, 0.4, 0.45);   // Soft white glow
+                                    mat.alpha = 0.35;  // Semi-transparent white
+                                    mat.backFaceCulling = false;
+                                    mesh.visibility = 0.35;
+                                } else {
+                                    // Organ - use realistic anatomical colors
+                                    const organId = config.id === 'kidneys_r' ? 'kidneys' : config.id;
+                                    const baseColor = ORGAN_COLORS[organId] || new BABYLON.Color3(0.6, 0.5, 0.5);
+                                    mat.diffuseColor = baseColor;
+
+                                    // Make vessels EXTRA visible with strong glow
+                                    if (organId === 'vessels') {
+                                        mat.emissiveColor = baseColor.scale(0.5);  // Strong red glow
+                                        mat.backFaceCulling = false;  // Visible from all angles
+                                        mesh.visibility = 1;  // Full opacity
+                                    } else {
+                                        mat.emissiveColor = baseColor.scale(0.15);
+                                    }
+                                    mat.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+                                }
+
+                                mesh.material = mat;
+                            }
+                        });
+
+                        console.log(`Loaded: ${config.id} (${result.meshes.length} meshes)`);
+                    }
+                } catch (err) {
+                    console.warn(`Failed to load ${config.id}:`, err.message);
+                }
+            }
+
+            // Scale and center the entire body group
+            const bounds = bodyGroup.getHierarchyBoundingVectors();
+            const size = bounds.max.subtract(bounds.min);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scaleFactor = 2.5 / maxDim;
+
+            bodyGroup.scaling = new BABYLON.Vector3(scaleFactor, scaleFactor, scaleFactor);
+
+            // Recalculate and center
+            const newBounds = bodyGroup.getHierarchyBoundingVectors();
+            const center = newBounds.max.add(newBounds.min).scale(0.5);
+            bodyGroup.position = center.scale(-1);
+
+            // Create eyes with correct positioning
+            createEyes(gender);
+
+            // Make organs clickable
+            setupOrganInteractions();
+
+            updateLoadingText('Ready!');
+        }
+
+        // Setup click interactions for 3D organs
+        function setupOrganInteractions() {
+            // Enable pointer events on the scene
+            scene.onPointerDown = function (evt, pickResult) {
+                if (pickResult.hit && pickResult.pickedMesh) {
+                    const meshName = pickResult.pickedMesh.name.toLowerCase();
+
+                    // Determine which organ was clicked
+                    let organId = null;
+                    if (meshName.includes('heart')) organId = 'heart';
+                    else if (meshName.includes('pancreas')) organId = 'pancreas';
+                    else if (meshName.includes('kidney')) organId = 'kidneys';
+                    else if (meshName.includes('vessel') || meshName.includes('blood')) organId = 'vessels';
+                    else if (meshName.includes('eye') || meshName.includes('iris') || meshName.includes('pupil')) organId = 'eyes';
+
+                    if (organId && window.currentData?.[organId]) {
+                        window.showOrganDetails(organId);
+                    }
+                }
+            };
+
+            console.log('Organ interactions enabled - click any organ to see details');
+        }
+
+        // Create visible eyes on the head - AUTO-POSITIONED based on body model
+        function createEyes(gender = 'Male') {
+            // Get the body's actual bounds (before centering transform)
+            const bounds = bodyGroup.getHierarchyBoundingVectors();
+            const bodyHeight = bounds.max.y - bounds.min.y;
+            const bodyWidth = bounds.max.x - bounds.min.x;
+
+            // Calculate eye position as percentage of body dimensions
+            // FIXED: Lowered further to 0.78 (was 0.82) based on visual feedback
+            // Female model tuning
+            const isFemale = gender.toLowerCase() === 'female';
+            const heightFactor = isFemale ? 0.78 : 0.79;
+
+            const eyeY = bounds.min.y + (bodyHeight * heightFactor);
+
+            // Eyes forward from center (5.5% of body height)
+            const eyeZ = bodyHeight * 0.055;
+
+            // Eye spacing (reduced width from 0.11 -> 0.09)
+            const eyeSpacing = bodyWidth * 0.09;
+
+            // Eye size relative to body (1% of body height)
+            const eyeSize = bodyHeight * 0.01;
+
+            console.log(`Eye positioning: Y=${eyeY.toFixed(3)}, Spacing=${eyeSpacing.toFixed(3)}, Size=${eyeSize.toFixed(3)}`);
+
+            [-1, 1].forEach((side, i) => {
+                // White eyeball
+                const eyeball = BABYLON.MeshBuilder.CreateSphere(`eyeball_${i}`, {
+                    diameter: eyeSize,
+                    segments: 16
+                }, scene);
+                eyeball.position = new BABYLON.Vector3(side * eyeSpacing, eyeY, eyeZ);
+                eyeball.parent = bodyGroup;
+
+                const whiteMat = new BABYLON.StandardMaterial(`eye_white_${i}`, scene);
+                whiteMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
+                whiteMat.emissiveColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+                eyeball.material = whiteMat;
+
+                // Brown iris
+                const iris = BABYLON.MeshBuilder.CreateSphere(`iris_${i}`, {
+                    diameter: eyeSize * 0.5,
+                    segments: 12
+                }, scene);
+                iris.position = new BABYLON.Vector3(side * eyeSpacing, eyeY, eyeZ + eyeSize * 0.4);
+                iris.parent = bodyGroup;
+
+                const irisMat = new BABYLON.StandardMaterial(`iris_mat_${i}`, scene);
+                irisMat.diffuseColor = new BABYLON.Color3(0.35, 0.2, 0.1);
+                irisMat.emissiveColor = new BABYLON.Color3(0.08, 0.05, 0.02);
+                iris.material = irisMat;
+
+                // Black pupil
+                const pupil = BABYLON.MeshBuilder.CreateSphere(`pupil_${i}`, {
+                    diameter: eyeSize * 0.22,
+                    segments: 8
+                }, scene);
+                pupil.position = new BABYLON.Vector3(side * eyeSpacing, eyeY, eyeZ + eyeSize * 0.48);
+                pupil.parent = bodyGroup;
+
+                const pupilMat = new BABYLON.StandardMaterial(`pupil_mat_${i}`, scene);
+                pupilMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+                pupil.material = pupilMat;
+
+                // Store for updates
+                if (!organMeshes['eyes']) organMeshes['eyes'] = [];
+                organMeshes['eyes'].push(eyeball, iris);
+            });
+            console.log('Eyes auto-positioned based on body model');
+        }
+
+        // Apply realistic damage effects to organs
+        function applyDamageEffect(baseColor, damageLevel) {
+            const effects = DAMAGE_EFFECTS[damageLevel] || DAMAGE_EFFECTS.green;
+
+            // Start with base color
+            let r = baseColor.r;
+            let g = baseColor.g;
+            let b = baseColor.b;
+
+            // Darken (reduce brightness)
+            r *= (1 - effects.darken);
+            g *= (1 - effects.darken);
+            b *= (1 - effects.darken);
+
+            // Desaturate (move toward gray)
+            const gray = (r + g + b) / 3;
+            r = r + (gray - r) * effects.desaturate;
+            g = g + (gray - g) * effects.desaturate;
+            b = b + (gray - b) * effects.desaturate;
+
+            // Add inflammation (reddish/brownish tint for damage)
+            r = Math.min(1, r + effects.inflame * 0.3);
+            g = Math.max(0, g - effects.inflame * 0.1);
+            b = Math.max(0, b - effects.inflame * 0.15);
+
+            return new BABYLON.Color3(r, g, b);
+        }
+
+        // Update organ appearance based on risk level
+        window.updateOrganColors = function (dataMap) {
+            console.log('Updating organ damage effects:', dataMap);
+
+            Object.entries(dataMap).forEach(([id, data]) => {
+                const meshArray = organMeshes[id];
+                if (!meshArray || meshArray.length === 0) return;
+
+                // Get base anatomical color for this organ
+                const baseColor = ORGAN_COLORS[id] || new BABYLON.Color3(0.6, 0.5, 0.5);
+
+                // Apply damage effects based on risk level
+                const damagedColor = applyDamageEffect(baseColor, data.color);
+
+                // Higher risk = more red emissive glow (inflammation)
+                const glowIntensity = data.color === 'red' ? 0.4 : data.color === 'yellow' ? 0.2 : 0.1;
+                const emissiveColor = data.color === 'red'
+                    ? new BABYLON.Color3(0.4, 0.1, 0.1)  // Red warning glow
+                    : damagedColor.scale(glowIntensity);
+
+                console.log(`${id}: ${data.color} damage applied`);
+
+                meshArray.forEach(mesh => {
+                    if (mesh.material) {
+                        mesh.material.diffuseColor = damagedColor;
+                        mesh.material.emissiveColor = emissiveColor;
+                    }
+                });
+            });
+        };
+
+        // Show organ details with ALL available data
+        window.showOrganDetails = function (organId) {
+            const data = window.currentData?.[organId];
+            if (!data) return;
+
+            const popup = document.getElementById('organ-popup');
+            document.getElementById('pop-title').innerText = organId.toUpperCase();
+
+            // Build comprehensive description
+            let description = '';
+
+            // Function level
+            if (data.function_level !== undefined) {
+                const funcPercent = Math.round(data.function_level * 100);
+                description += `Function: ${funcPercent}%\n`;
+            }
+
+            // Risk score
+            if (data.risk_score !== undefined) {
+                description += `Risk Score: ${data.risk_score}/100\n`;
+            }
+            if (data.future_risk_score !== undefined) {
+                description += `Risk Score: ${data.future_risk_score}/100\n`;
+            }
+
+            // Specific organ data
+            if (data.hba1c) description += `HbA1c: ${data.hba1c}%\n`;
+            if (data.avg_glucose) description += `Avg Glucose: ${data.avg_glucose} mg/dL\n`;
+            if (data.glycation_level) description += `Glycation: ${Math.round(data.glycation_level * 100)}%\n`;
+            if (data.status) description += `Status: ${data.status}\n`;
+
+            // Recommendation
+            if (data.recommendation) description += `\n${data.recommendation}`;
+            if (data.description) description += `\n${data.description}`;
+
+            document.getElementById('pop-desc').innerText = description.trim();
+            document.getElementById('pop-val').innerText = data.function_level ?
+                `${Math.round((1 - data.function_level) * 100)}%` : '0%';
+
+            const badge = document.getElementById('pop-badge');
+            badge.innerText = (data.risk_level || 'LOW').toUpperCase() + ' RISK';
+            badge.className = 'risk-badge ' + (data.color === 'red' ? 'bg-danger' : data.color === 'yellow' ? 'bg-warn' : 'bg-safe');
+
+            popup.style.display = 'block';
+            setTimeout(() => popup.style.display = 'none', 6000);  // 6 seconds to read more data
+        };
+
+        // Initialize Babylon.js
+        document.addEventListener('DOMContentLoaded', initBabylon);
+    </script>
+
+    <script>
+        window.fetchData = async (years) => {
+            const pid = document.getElementById('pid').value;
+            const yearsInt = parseInt(years) || 0;
+            const preview = document.getElementById('cognitive-preview');
+            if (preview) preview.innerText = 'Analyzing...';
+
+            try {
+                const r1 = await fetch(`${API}/twin/${pid}`);
+                const d1 = await r1.json();
+                document.getElementById('val-age').innerText = d1.demographics.age;
+                document.getElementById('val-gender').innerText = d1.demographics.gender;
+                document.getElementById('val-bmi').innerText = d1.demographics.bmi;
+
+                // Reload models if gender changed
+                const newGender = d1.demographics.gender;
+                if (newGender && newGender !== currentGender) {
+                    currentGender = newGender;
+                    console.log(`Gender changed to ${newGender}, reloading models...`);
+                    await loadOrgans(newGender);
+                }
+
+                const r2 = await fetch(`${API}/twin/${pid}/visualization-data?years_ahead=${yearsInt}`);
+                const data = await r2.json();
+                console.log(`📊 API Response for Year ${2025 + yearsInt} (${yearsInt} years ahead):`);
+                console.log(`   Projected HbA1c: ${data.projected_hba1c}%`);
+                console.log(`   Organ Data:`);
+                console.table(data.organs);  // Table view of all organs
+
+                document.getElementById('val-hba1c').innerText = data.organs.pancreas.hba1c + "%";
+                updateList(data.organs);
+
+                console.log(`🎨 Updating organ colors...`);
+                if (window.updateOrganColors) {
+                    window.updateOrganColors(data.organs);
+                    console.log(`✅ Organ colors updated`);
+                }
+
+                if (data.summary?.cognitive_prediction) {
+                    const cogYear = 2025 + yearsInt;
+                    console.log(`🧠 Cognitive year: ${cogYear}`);
+                    if (preview) preview.innerText = data.summary.cognitive_prediction.split('\n')[0].substring(0, 35) + '...';
+                    window.cognitiveData = { text: data.summary.cognitive_prediction, control: data.summary.overall_control, year: cogYear };
+                }
+                window.currentData = data.organs;
+            } catch (e) {
+                console.error("API Error", e);
+                if (preview) preview.innerText = 'Demo mode';
+                const demoData = {
+                    heart: { color: 'yellow', risk_level: 'MODERATE', description: 'Cardiovascular monitoring recommended' },
+                    pancreas: { color: 'red', risk_level: 'HIGH', description: 'Elevated HbA1c indicates poor glycemic control', hba1c: 8.5 },
+                    kidneys: { color: 'yellow', risk_level: 'MODERATE', description: 'Early signs of nephropathy' },
+                    vessels: { color: 'yellow', risk_level: 'MODERATE', description: 'Vascular health needs attention' },
+                    eyes: { color: 'green', risk_level: 'LOW', description: 'No retinopathy detected' }
+                };
+                window.currentData = demoData;
+                updateList(demoData);
+                if (window.updateOrganColors) window.updateOrganColors(demoData);
+            }
+        };
+
+        window.updateTime = (val) => {
+            console.log(`🔢 RAW SLIDER VALUE: "${val}" (type: ${typeof val})`);
+            const valParsed = parseInt(val);
+            const year = 2025 + valParsed;
+            console.log(`📅 Calculation: 2025 + ${valParsed} = ${year}`);
+            console.log(`📅 Timeline changed: Year ${year} (${valParsed} years ahead)`);
+            document.getElementById('year-text').innerText = year;
+            fetchData(val);
+        };
+
+        window.openCognitiveModal = () => {
+            const modal = document.getElementById('cognitive-modal');
+            const content = document.getElementById('modal-content');
+            if (window.cognitiveData) {
+                document.getElementById('modal-year-label').innerText = `Year ${window.cognitiveData.year}`;
+                content.innerHTML = window.cognitiveData.text.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #58a6ff;">$1</strong>').replace(/\n/g, '<br>');
+            } else {
+                content.innerHTML = '<p>Load a patient first.</p>';
+            }
+            modal.style.display = 'flex';
+        };
+
+        window.closeCognitiveModal = () => document.getElementById('cognitive-modal').style.display = 'none';
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCognitiveModal(); });
+
+        function updateList(dataMap) {
+            console.log(`🗂️ updateList called with data:`, dataMap);
+            const list = document.getElementById('organ-list');
+            list.innerHTML = "";
+            for (let [key, val] of Object.entries(dataMap)) {
+                // Map color codes to hex colors
+                const colorMap = {
+                    'green': '#00ff88',   // Low risk
+                    'yellow': '#ffaa00',  // Moderate risk  
+                    'red': '#ff0055'      // High risk
+                };
+
+                // Use the color from API (already correct: red/yellow/green)
+                const displayColor = colorMap[val.color] || '#aaa';
+
+                //Debug log for each organ
+                console.log(`  ${key}: risk_level="${val.risk_level}", color="${val.color}" → ${displayColor}`);
+
+                // Map risk_level text to match the color
+                let riskText = val.risk_level || 'N/A';
+                if (typeof riskText === 'string') {
+                    riskText = riskText.toLowerCase();
+                }
+
+                const item = document.createElement('div');
+                item.className = 'organ-item';
+                item.onclick = () => window.showOrganDetails(key);
+                item.innerHTML = `<span style="color:#eee; text-transform:uppercase;">${key}</span><span style="color:${displayColor}; font-weight:700;">${riskText}</span>`;
+                list.appendChild(item);
+            }
+        }
+
+        setTimeout(() => fetchData(0), 2500);
+    </script>
+</body>
+
+</html>
